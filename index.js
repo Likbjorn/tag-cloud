@@ -67,11 +67,12 @@ nodes.append("text")
 
 // add force simulation
 const simulation = d3.forceSimulation(data.nodes)
-    .force("charge", d3.forceManyBody().strength(-100))
+    .force("charge", d3.forceManyBody().strength(-500))
     .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("link", d3.forceLink(data.links).distance(100).id(d => d.title));
+    .force("link", d3.forceLink(data.links).id(d => d.title));
 
 simulation.on("tick", ticked);
+simulation.force("link").distance(150)
 
 function ticked() {
   links.attr("x1", d => d.source.x)
