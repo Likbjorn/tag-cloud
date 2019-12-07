@@ -9,13 +9,13 @@ const data = {
     {index: 5, title: "Statistics"}
   ],
   "links": [
-    {source: 0, target: 2},
-    {source: 0, target: 1},
-    {source: 1, target: 3},
-    {source: 2, target: 4},
-    {source: 2, target: 5},
-    {source: 0, target: 5},
-    {source: 4, target: 5},
+    {source: "Physics", target: "Math"},
+    {source: "Physics", target: "Biology"},
+    {source: "Biology", target: "Medicine"},
+    {source: "Math", target: "Economy"},
+    {source: "Math", target: "Statistics"},
+    {source: "Physics", target: "Statistics"},
+    {source: "Economy", target: "Statistics"},
   ]
 }
 
@@ -54,8 +54,7 @@ var nodes = svg.selectAll(".node")
         update => update,
         exit => exit.remove()
       )
-      .attr("title", d => d.title)
-      .attr("alpha". 0.5);
+      .attr("title", d => d.title);
 
 // append basic circle to each node
 nodes.append("circle")
@@ -70,7 +69,7 @@ nodes.append("text")
 const simulation = d3.forceSimulation(data.nodes)
     .force("charge", d3.forceManyBody().strength(-100))
     .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("link", d3.forceLink(data.links).distance(100));
+    .force("link", d3.forceLink(data.links).distance(100).id(d => d.title));
 
 simulation.on("tick", ticked);
 
