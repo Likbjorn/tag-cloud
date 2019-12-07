@@ -1,17 +1,21 @@
 // data; not in json file for dev purposes
-data = {
+const data = {
   "nodes": [
-    {"id": 1, "title": "Physics"},
-    {"id": 2, "title": "Biology"},
-    {"id": 3, "title": "Math"},
-    {"id": 4, "title": "Medicine"},
-    {"id": 5, "title": "Economy"}
+    {index: 0, title: "Physics"},
+    {index: 1, title: "Biology"},
+    {index: 2, title: "Math"},
+    {index: 3, title: "Medicine"},
+    {index: 4, title: "Economy"},
+    {index: 5, title: "Statistics"}
   ],
   "links": [
-    {"source": 1, "target": 3},
-    {"source": 1, "target": 2},
-    {"source": 2, "target": 4},
-    {"source": 3, "target": 5}
+    {source: "Physics", target: "Math"},
+    {source: "Physics", target: "Biology"},
+    {source: "Biology", target: "Medicine"},
+    {source: "Math", target: "Economy"},
+    {source: "Math", target: "Statistics"},
+    {source: "Physics", target: "Statistics"},
+    {source: "Economy", target: "Statistics"},
   ]
 }
 
@@ -26,29 +30,55 @@ const svg = d3.select("#svg_container")
   .attr("height", height)
   .attr("text-anchor", "middle");
 
+
+var links = svg.append("g")
+  .attr("class", "links")
+  .attr("stroke", "grey")
+  .attr("stroke-width", "2px")
+  .selectAll("line")
+  .data(data.links)
+  .enter().append("line")
+  .join(
+    enter => enter.append("line"),
+    update => update,
+    exit => exit.remove()
+  );
+
+
 // Create svg groups for each node and bind it with data
 // later we can add pretty objects to represent our nodes
-const nodes = svg.selectAll('.node')
+var nodes = svg.selectAll(".node")
       .data( data.nodes )
-    .enter().append('g')
-      .attr('title', d => d.title);
+    .join(
+        enter => enter.append("g"),
+        update => update,
+        exit => exit.remove()
+      )
+      .attr("title", d => d.title);
 
 // append basic circle to each node
-nodes.append('circle')
-      .attr('r', r)
-      .attr('fill', "green");
+nodes.append("circle")
+      .attr("r", r)
+      .attr("fill", "green");
 
 // and create a text label on it basing on title in data.nodes
-nodes.append('text')
-  .text(d => d.title)
+nodes.append("text")
+  .text(d => d.title);
 
-var simulation = d3.forceSimulation(data.nodes)
-    .force('charge', d3.forceManyBody().strength(-20))
-    .force('center', d3.forceCenter(width / 2, height / 2))
-    .on('tick', ticked);
+// add force simulation
+const simulation = d3.forceSimulation(data.nodes)
+    .force("charge", d3.forceManyBody().strength(-500))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("link", d3.forceLink(data.links).id(d => d.title));
+
+simulation.on("tick", ticked);
+simulation.force("link").distance(150)
 
 function ticked() {
-  // create <g>roup for each node
-  nodes.data(data.nodes)
-    .attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`)
+  links.attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
+
+  nodes.attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`);
 }
