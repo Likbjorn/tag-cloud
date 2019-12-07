@@ -1,0 +1,15 @@
+{
+  "nodes": [
+    {"id": 1, "title": "Physics"},
+    {"id": 2, "title": "Biology"},
+    {"id": 3, "title": "Math"},
+    {"id": 4, "title": "Medicine"},
+    {"id": 5, "title": "Economy"}
+  ],
+  "links": [
+    {"source": 1, "target": 3},
+    {"source": 1, "target": 2},
+    {"source": 2, "target": 4},
+    {"source": 3, "target": 5}
+  ]
+}
