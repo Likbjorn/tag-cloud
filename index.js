@@ -26,24 +26,20 @@ const svg = d3.select("#svg_container")
   .attr("height", height)
   .attr("text-anchor", "middle");
 
-// prepare data
-initData(data);
-
 // Create svg groups for each node and bind it with data
 // later we can add pretty objects to represent our nodes
-const node = svg.selectAll('.node')
+const nodes = svg.selectAll('.node')
       .data( data.nodes )
     .enter().append('g')
-      .attr('title', d => d.title)
-      .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
+      .attr('title', d => d.title);
 
 // append basic circle to each node
-node.append('circle')
+nodes.append('circle')
       .attr('r', r)
       .attr('fill', "green");
 
 // and create a text label on it basing on title in data.nodes
-node.append('text')
+nodes.append('text')
   .text(d => d.title)
 
 var simulation = d3.forceSimulation(data.nodes)
@@ -51,23 +47,8 @@ var simulation = d3.forceSimulation(data.nodes)
     .force('center', d3.forceCenter(width / 2, height / 2))
     .on('tick', ticked);
 
-function initData(data) {
-  // Set random start position
-  data.nodes.forEach(function(node) {
-    node.x = randomIntFromInterval(r, width - r);
-    node.y = randomIntFromInterval(r, height - r);
-  })
-}
-
-
-function randomIntFromInterval(min, max) { // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-
 function ticked() {
   // create <g>roup for each node
-
-  node.data(data.nodes)
+  nodes.data(data.nodes)
     .attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`)
 }
