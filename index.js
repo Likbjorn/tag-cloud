@@ -30,7 +30,7 @@ const svg = d3.select("#svg_container")
   .attr("height", height)
   .attr("text-anchor", "middle");
 
-
+// create links and group for them
 var links = svg.append("g")
   .attr("class", "links")
   .attr("stroke", "grey")
@@ -74,6 +74,13 @@ const simulation = d3.forceSimulation(data.nodes)
 simulation.on("tick", ticked);
 simulation.force("link").distance(150)
 
+
+// handle user interaction
+nodes.selectAll("circle")
+  .on("mouseover", handleBubbleOnMouseOver)
+  .on("mouseout", handleBubbleOnMouseOut)
+
+
 function ticked() {
   links.attr("x1", d => d.source.x)
     .attr("y1", d => d.source.y)
@@ -81,4 +88,18 @@ function ticked() {
     .attr("y2", d => d.target.y);
 
   nodes.attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`);
+}
+
+
+function handleBubbleOnMouseOver() {
+  // TODO: do better styling here
+  d3.select(this)
+    .attr("fill", "darkgreen");
+}
+
+
+function handleBubbleOnMouseOut () {
+  // TODO: do better styling here
+  d3.select(this)
+    .attr("fill", "green");
 }
