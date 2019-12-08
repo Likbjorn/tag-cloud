@@ -68,7 +68,7 @@ nodes.append("text")
 // add force simulation
 const simulation = d3.forceSimulation(data.nodes)
     .force("charge", d3.forceManyBody().strength(-500))
-    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("center", d3.forceRadial(height / 4, width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title));
 
 simulation.on("tick", ticked);
