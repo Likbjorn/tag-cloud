@@ -74,6 +74,12 @@ const simulation = d3.forceSimulation(data.nodes)
 simulation.on("tick", ticked);
 simulation.force("link").distance(150)
 
+nodes.call(
+  d3.drag()
+      .on("start", dragStarted)
+      .on("drag", dragged)
+      .on("end", dragEnded)
+  );
 
 // handle user interaction
 nodes.selectAll("circle")
@@ -102,4 +108,23 @@ function handleBubbleOnMouseOut () {
   // TODO: do better styling here
   d3.select(this)
     .attr("fill", "green");
+}
+
+
+function dragStarted (d) {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+
+function dragged(d) {
+  d.fx = d3.event.x;
+    d.fy = d3.event.y;
+}
+
+function dragEnded(d) {
+  if (!d3.event.active) simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
 }
