@@ -23,6 +23,9 @@ const data = {
 const width = 600, height = 400;
 const r = 30;
 
+const defaultColor = "green",
+      hoverColor = "darkgreen";
+
 // create svg
 const svg = d3.select("#svg_container")
   .append("svg")
@@ -30,7 +33,7 @@ const svg = d3.select("#svg_container")
   .attr("height", height)
   .attr("text-anchor", "middle");
 
-
+// create links and group for them
 var links = svg.append("g")
   .attr("class", "links")
   .attr("stroke", "grey")
@@ -59,7 +62,7 @@ var nodes = svg.selectAll(".node")
 // append basic circle to each node
 nodes.append("circle")
       .attr("r", r)
-      .attr("fill", "green");
+      .attr("fill", defaultColor);
 
 // and create a text label on it basing on title in data.nodes
 nodes.append("text")
@@ -68,11 +71,25 @@ nodes.append("text")
 // add force simulation
 const simulation = d3.forceSimulation(data.nodes)
     .force("charge", d3.forceManyBody().strength(-500))
-    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("center", d3.forceRadial(height / 4, width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title));
 
 simulation.on("tick", ticked);
-simulation.force("link").distance(150)
+simulation.force("link").distance(150);
+
+nodes.call(
+  d3.drag()
+      .on("start", dragStarted)
+      .on("drag", dragged)
+      .on("end", dragEnded)
+  );
+
+// handle user interaction
+nodes.selectAll("circle")
+  .on("mouseover", handleBubbleOnMouseOver)
+  .on("mouseout", handleBubbleOnMouseOut)
+  .on("click", handleBubbleOnMouseClick)
+
 
 function ticked() {
   links.attr("x1", d => d.source.x)
@@ -81,4 +98,48 @@ function ticked() {
     .attr("y2", d => d.target.y);
 
   nodes.attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`);
+}
+
+
+function handleBubbleOnMouseOver() {
+  // TODO: do better styling here
+  d3.select(this)
+    .attr("fill", hoverColor);
+}
+
+
+function handleBubbleOnMouseOut () {
+  // TODO: do better styling here
+  d3.select(this)
+    .attr("fill", defaultColor);
+}
+
+
+function dragStarted (d) {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+
+function dragged(d) {
+  d.fx = d3.event.x;
+    d.fy = d3.event.y;
+}
+
+
+function dragEnded(d) {
+  if (!d3.event.active) simulation.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
+
+
+function handleBubbleOnMouseClick() {
+  // placeholder visual transitions on click
+  d3.select(this)
+    .transition()
+    .style("fill", "black")
+    .transition()
+    .style("fill", defaultColor)
 }
