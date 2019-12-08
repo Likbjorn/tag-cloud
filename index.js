@@ -23,6 +23,9 @@ const data = {
 const width = 600, height = 400;
 const r = 30;
 
+const defaultColor = "green",
+      hoverColor = "darkgreen";
+
 // create svg
 const svg = d3.select("#svg_container")
   .append("svg")
@@ -59,7 +62,7 @@ var nodes = svg.selectAll(".node")
 // append basic circle to each node
 nodes.append("circle")
       .attr("r", r)
-      .attr("fill", "green");
+      .attr("fill", defaultColor);
 
 // and create a text label on it basing on title in data.nodes
 nodes.append("text")
@@ -85,6 +88,7 @@ nodes.call(
 nodes.selectAll("circle")
   .on("mouseover", handleBubbleOnMouseOver)
   .on("mouseout", handleBubbleOnMouseOut)
+  .on("click", handleBubbleOnMouseClick)
 
 
 function ticked() {
@@ -100,14 +104,14 @@ function ticked() {
 function handleBubbleOnMouseOver() {
   // TODO: do better styling here
   d3.select(this)
-    .attr("fill", "darkgreen");
+    .attr("fill", hoverColor);
 }
 
 
 function handleBubbleOnMouseOut () {
   // TODO: do better styling here
   d3.select(this)
-    .attr("fill", "green");
+    .attr("fill", defaultColor);
 }
 
 
@@ -123,8 +127,19 @@ function dragged(d) {
     d.fy = d3.event.y;
 }
 
+
 function dragEnded(d) {
   if (!d3.event.active) simulation.alphaTarget(0);
   d.fx = null;
   d.fy = null;
+}
+
+
+function handleBubbleOnMouseClick() {
+  // placeholder visual transitions on click
+  d3.select(this)
+    .transition()
+    .style("fill", "black")
+    .transition()
+    .style("fill", defaultColor)
 }
