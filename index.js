@@ -72,7 +72,7 @@ const simulation = d3.forceSimulation(data.nodes)
     .force("link", d3.forceLink(data.links).id(d => d.title));
 
 simulation.on("tick", ticked);
-simulation.force("link").distance(150)
+simulation.force("link").distance(150);
 
 nodes.call(
   d3.drag()
