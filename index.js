@@ -21,11 +21,11 @@ const data = {
 
 // constants
 const width = 600, height = 400;
-const r = 30;
+const r = 40;
 const interactionRange = 100;
 
-const defaultColor = "green",
-      hoverColor = "darkgreen";
+const defaultColor = "lightgreen",
+      hoverColor = "green";
 
 // create svg
 const svg = d3.select("#svg_container")
@@ -47,7 +47,6 @@ var links = svg.append("g")
     update => update,
     exit => exit.remove()
   );
-
 
 // Create svg groups for each node and bind it with data
 // later we can add pretty objects to represent our nodes
@@ -71,12 +70,14 @@ nodes.append("text")
 
 // add force simulation
 const simulation = d3.forceSimulation(data.nodes)
-    .force("charge", d3.forceManyBody().strength(-500))
-    .force("center", d3.forceRadial(height / 4, width / 2, height / 2))
+    .force("charge", d3.forceManyBody().strength(-1000))
+    .force("radial", d3.forceRadial(height / 4, width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title));
 
 simulation.on("tick", ticked);
-simulation.force("link").distance(150);
+simulation.force("link").distance(100);
+
+simulation.force("radial").strength(.5)
 
 svg.on("mousemove", handleSimOnMouseMove)
 
