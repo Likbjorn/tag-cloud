@@ -115,6 +115,16 @@ function handleBubbleOnMouseOut () {
 }
 
 
+function handleBubbleOnMouseClick() {
+  // placeholder visual transitions on click
+  d3.select(this)
+    .transition()
+    .style("fill", "black")
+    .transition()
+    .style("fill", defaultColor)
+}
+
+
 function dragStarted (d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
   d.fx = d.x;
@@ -124,7 +134,7 @@ function dragStarted (d) {
 
 function dragged(d) {
   d.fx = d3.event.x;
-    d.fy = d3.event.y;
+  d.fy = d3.event.y;
 }
 
 
@@ -132,14 +142,4 @@ function dragEnded(d) {
   if (!d3.event.active) simulation.alphaTarget(0);
   d.fx = null;
   d.fy = null;
-}
-
-
-function handleBubbleOnMouseClick() {
-  // placeholder visual transitions on click
-  d3.select(this)
-    .transition()
-    .style("fill", "black")
-    .transition()
-    .style("fill", defaultColor)
 }
