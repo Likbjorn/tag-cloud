@@ -22,6 +22,7 @@ const data = {
 // constants
 const width = 600, height = 400;
 const r = 30;
+const interactionRange = 100;
 
 const defaultColor = "green",
       hoverColor = "darkgreen";
@@ -77,6 +78,9 @@ const simulation = d3.forceSimulation(data.nodes)
 simulation.on("tick", ticked);
 simulation.force("link").distance(150);
 
+svg.on("mousemove", handleSimOnMouseMove)
+
+// add drag functionality
 nodes.call(
   d3.drag()
       .on("start", dragStarted)
@@ -125,6 +129,23 @@ function handleBubbleOnMouseClick() {
 }
 
 
+function handleSimOnMouseMove() {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+
+  let x = d3.event.x,
+      y = d3.event.y;
+
+  //find nearest node
+  node = simulation.find(x, y, interactionRange);
+
+  // set node velocity towards cursor
+  if (typeof(node) != "undefined") {
+    node.vx = (x - node.x)*0.1;
+    node.vy = (y - node.y)*0.1;
+  }
+}
+
+
 function dragStarted (d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
   d.fx = d.x;
@@ -133,6 +154,7 @@ function dragStarted (d) {
 
 
 function dragged(d) {
+
   d.fx = d3.event.x;
   d.fy = d3.event.y;
 }
