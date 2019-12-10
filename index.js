@@ -30,6 +30,7 @@ const gaussBlur = 5;
       hoverColor = "green";
 */
 
+
 // mouse position storage
 var mouse = {x: 0, y: 0}
 
@@ -166,6 +167,24 @@ function handleBubbleOnMouseClick() {
     .transition()
     .style("fill", "black")
     .transition()
+}
+
+
+function handleSimOnMouseMove() {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+
+  mouse.x = d3.event.x;
+  mouse.y = d3.event.y;
+}
+
+
+function handleBubbleOnMouseClick() {
+  // TODO: do better styling here
+  d3.select(this)
+    .transition()
+    .style("fill", "black")
+    .transition()
+    .style("fill", defaultColor)
 }
 
 
