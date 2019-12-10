@@ -23,9 +23,13 @@ const data = {
 const width = 600, height = 400;
 const r = 40;
 const interactionRange = 80;
+const gaussBlur = 5;
 
-const defaultColor = "lightgreen",
+// colors are defined in CSS now
+/*const defaultColor = "lightgreen",
       hoverColor = "green";
+*/
+
 
 // mouse position storage
 var mouse = {x: 0, y: 0}
@@ -36,6 +40,13 @@ const svg = d3.select("#svg_container")
   .attr("width", width)
   .attr("height", height)
   .attr("text-anchor", "middle");
+
+// add a blur filter
+var blur_filter = svg.append("defs")
+  .append("filter")
+    .attr("id", "svg_blur")
+  .append("feGaussianBlur")
+    .attr("stdDeviation", gaussBlur);
 
 // create links and group for them
 var links = svg.append("g")
@@ -65,11 +76,15 @@ var nodes = svg.selectAll(".node")
 // append basic circle to each node
 nodes.append("circle")
       .attr("r", r)
-      .attr("fill", defaultColor);
+      .attr("class", "tag_circles")
+      .attr("id", d => d.title);
+      // .attr("fill", defaultColor);
 
 // and create a text label on it basing on title in data.nodes
 nodes.append("text")
-  .text(d => d.title);
+  .text(d => d.title)
+  .style("pointer-events", "none");
+
 
 // add force simulation
 const simulation = d3.forceSimulation(data.nodes)
@@ -94,8 +109,8 @@ nodes.call(
 
 // handle user interaction
 nodes.selectAll("circle")
-  .on("mouseover", handleBubbleOnMouseOver)
-  .on("mouseout", handleBubbleOnMouseOut)
+//  .on("mouseover", handleBubbleOnMouseOver)
+//  .on("mouseout", handleBubbleOnMouseOut)
   .on("click", handleBubbleOnMouseClick)
 
 
@@ -112,12 +127,26 @@ function ticked() {
 
   // set node velocity towards cursor
   if (typeof(node) != "undefined") {
-    node.vx = (mouse.x - node.x)*0.1;
-    node.vy = (mouse.y - node.y)*0.1;
+    node.vx = (mouse.x - node.x)*0.05;
+    node.vy = (mouse.y - node.y)*0.05;
+
+    mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
+    blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
+
+    if (d3.select("#"+node.title) != d3.select(".hovered_circle")) {
+      d3.select(".hovered_circle").classed("hovered_circle", false)
+      //blur_ratio = gaussBlur;
+      d3.select("#"+node.title).classed("hovered_circle", true);
+      prev_node = node;
+    }
+    blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
   }
 }
 
+// we don't need these handlers for styling any more
+// though they might get useful later
 
+/*
 function handleBubbleOnMouseOver() {
   // TODO: do better styling here
   d3.select(this)
@@ -129,6 +158,23 @@ function handleBubbleOnMouseOut () {
   // TODO: do better styling here
   d3.select(this)
     .attr("fill", defaultColor);
+}
+*/
+
+function handleBubbleOnMouseClick() {
+  // TODO: do better styling here
+  d3.select(this)
+    .transition()
+    .style("fill", "black")
+    .transition()
+}
+
+
+function handleSimOnMouseMove() {
+  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+
+  mouse.x = d3.event.x;
+  mouse.y = d3.event.y;
 }
 
 
