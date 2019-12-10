@@ -1,0 +1,18 @@
+body {
+  background: #0f002b;
+  margin: 0;
+  padding: 0;
+}
+
+.tag_circles {
+  fill: #ececde;
+  transition: all 1s ease-out;
+}
+
+.tag_circles:hover {
+}
+
+.hovered_circle {
+    fill: #3ac7f5;
+    filter: url(#svg_blur);
+}
