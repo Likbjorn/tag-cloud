@@ -22,10 +22,13 @@ const data = {
 // constants
 const width = 600, height = 400;
 const r = 40;
-const interactionRange = 100;
+const interactionRange = 80;
 
 const defaultColor = "lightgreen",
       hoverColor = "green";
+
+// mouse position storage
+var mouse = {x: 0, y: 0}
 
 // create svg
 const svg = d3.select("#svg_container")
@@ -72,10 +75,10 @@ nodes.append("text")
 const simulation = d3.forceSimulation(data.nodes)
     .force("charge", d3.forceManyBody().strength(-1000))
     .force("radial", d3.forceRadial(height / 4, width / 2, height / 2))
-    .force("link", d3.forceLink(data.links).id(d => d.title));
+    .force("link", d3.forceLink(data.links).id(d => d.title))
+    .on("tick", ticked);
 
-simulation.on("tick", ticked);
-simulation.force("link").distance(100);
+simulation.force("link").distance(100).strength(0);
 
 simulation.force("radial").strength(.5)
 
@@ -103,6 +106,15 @@ function ticked() {
     .attr("y2", d => d.target.y);
 
   nodes.attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`);
+
+  //find nearest node
+  node = simulation.find(mouse.x, mouse.y, interactionRange);
+
+  // set node velocity towards cursor
+  if (typeof(node) != "undefined") {
+    node.vx = (mouse.x - node.x)*0.1;
+    node.vy = (mouse.y - node.y)*0.1;
+  }
 }
 
 
@@ -121,7 +133,7 @@ function handleBubbleOnMouseOut () {
 
 
 function handleBubbleOnMouseClick() {
-  // placeholder visual transitions on click
+  // TODO: do better styling here
   d3.select(this)
     .transition()
     .style("fill", "black")
@@ -133,17 +145,8 @@ function handleBubbleOnMouseClick() {
 function handleSimOnMouseMove() {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
 
-  let x = d3.event.x,
-      y = d3.event.y;
-
-  //find nearest node
-  node = simulation.find(x, y, interactionRange);
-
-  // set node velocity towards cursor
-  if (typeof(node) != "undefined") {
-    node.vx = (x - node.x)*0.1;
-    node.vy = (y - node.y)*0.1;
-  }
+  mouse.x = d3.event.x;
+  mouse.y = d3.event.y;
 }
 
 
