@@ -25,12 +25,6 @@ const r = 40;
 const interactionRange = 80;
 const gaussBlur = 5;
 
-// colors are defined in CSS now
-/*const defaultColor = "lightgreen",
-      hoverColor = "green";
-*/
-
-
 // mouse position storage
 var mouse = {x: 0, y: 0}
 
@@ -109,8 +103,6 @@ nodes.call(
 
 // handle user interaction
 nodes.selectAll("circle")
-//  .on("mouseover", handleBubbleOnMouseOver)
-//  .on("mouseout", handleBubbleOnMouseOut)
   .on("click", handleBubbleOnMouseClick)
 
 
@@ -141,40 +133,6 @@ function ticked() {
     }
     blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
   }
-}
-
-// we don't need these handlers for styling any more
-// though they might get useful later
-
-/*
-function handleBubbleOnMouseOver() {
-  // TODO: do better styling here
-  d3.select(this)
-    .attr("fill", hoverColor);
-}
-
-
-function handleBubbleOnMouseOut () {
-  // TODO: do better styling here
-  d3.select(this)
-    .attr("fill", defaultColor);
-}
-*/
-
-function handleBubbleOnMouseClick() {
-  // TODO: do better styling here
-  d3.select(this)
-    .transition()
-    .style("fill", "black")
-    .transition()
-}
-
-
-function handleSimOnMouseMove() {
-  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-
-  mouse.x = d3.event.x;
-  mouse.y = d3.event.y;
 }
 
 
