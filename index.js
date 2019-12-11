@@ -149,8 +149,8 @@ function handleBubbleOnMouseClick() {
 function handleSimOnMouseMove() {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
 
-  mouse.x = d3.event.x;
-  mouse.y = d3.event.y;
+  mouse.x = d3.mouse(this)[0];
+  mouse.y = d3.mouse(this)[1];
 }
 
 
