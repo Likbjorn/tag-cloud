@@ -112,19 +112,21 @@ function ticked() {
     .attr("x2", d => d.target.x)
     .attr("y2", d => d.target.y);
 
+  // translate node according to forces
   nodes.attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`);
 
-  //find nearest node
+  // find nearest node
   node = simulation.find(mouse.x, mouse.y, interactionRange);
 
-  // set node velocity towards cursor
   if (typeof(node) != "undefined") {
+    // set node velocity towards cursor
     node.vx = (mouse.x - node.x)*0.05;
     node.vy = (mouse.y - node.y)*0.05;
 
     mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
     blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
 
+    // blur it
     if (d3.select("#"+node.title) != d3.select(".hovered_circle")) {
       d3.select(".hovered_circle").classed("hovered_circle", false)
       //blur_ratio = gaussBlur;
@@ -162,7 +164,6 @@ function dragStarted (d) {
 
 
 function dragged(d) {
-
   d.fx = d3.event.x;
   d.fy = d3.event.y;
 }
