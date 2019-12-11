@@ -28,6 +28,8 @@ const gaussBlur = 5;
 // mouse position storage
 var mouse = {x: 0, y: 0}
 
+var prev_node;
+
 // create svg
 const svg = d3.select("#svg_container")
   .append("svg")
@@ -131,9 +133,13 @@ function ticked() {
       d3.select(".hovered_circle").classed("hovered_circle", false)
       //blur_ratio = gaussBlur;
       d3.select("#"+node.title).classed("hovered_circle", true);
+
+      //remember last node
       prev_node = node;
     }
     blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
+  } else if (typeof(prev_node) != "undefined") {
+    d3.select("#"+prev_node.title).classed("hovered_circle", false);
   }
 }
 
