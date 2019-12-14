@@ -19,31 +19,35 @@ const data = {
     ]
 };
 
-// constants
-const width = 600, height = 400;
-const r = 40;
-const interactionRange = 80;
-const gaussBlur = 5;
-
-// mouse position storage
-var mouse = {x: 0, y: 0};
+var width = 600,
+    height = 400,
+    r = 40,
+    interactionRange = 80,
+    gaussBlur = 5,
+    mouse = {x: 0, y: 0},
+    svg,
+    nodes,
+    links,
+    simulation,
+    blur_filter,
+    blur_ratio;
 
 // create svg
-const svg = d3.select("#svg_container")
+svg = d3.select("#svg_container")
     .append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("text-anchor", "middle");
 
 // add a blur filter
-var blur_filter = svg.append("defs")
+blur_filter = svg.append("defs")
     .append("filter")
     .attr("id", "svg_blur")
     .append("feGaussianBlur")
     .attr("stdDeviation", gaussBlur);
 
 // create links and group for them
-var links = svg.append("g")
+links = svg.append("g")
     .attr("class", "links")
     .attr("stroke", "grey")
     .attr("stroke-width", "2px")
@@ -58,7 +62,7 @@ var links = svg.append("g")
 
 // Create svg groups for each node and bind it with data
 // later we can add pretty objects to represent our nodes
-var nodes = svg.selectAll(".node")
+nodes = svg.selectAll(".node")
     .data( data.nodes )
     .join(
         enter => enter.append("g"),
@@ -81,7 +85,7 @@ nodes.append("text")
 
 
 // add force simulation
-const simulation = d3.forceSimulation(data.nodes)
+simulation = d3.forceSimulation(data.nodes)
     .force("charge", d3.forceManyBody().strength(-100))
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title))
