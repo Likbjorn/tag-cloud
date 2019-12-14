@@ -82,14 +82,12 @@ nodes.append("text")
 
 // add force simulation
 const simulation = d3.forceSimulation(data.nodes)
-    .force("charge", d3.forceManyBody().strength(-1000))
-    .force("radial", d3.forceRadial(height / 4, width / 2, height / 2))
+    .force("charge", d3.forceManyBody().strength(-100))
+    .force("center", d3.forceCenter(width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title))
     .on("tick", ticked);
 
-simulation.force("link").distance(100).strength(0);
-
-simulation.force("radial").strength(0.5);
+simulation.force("link").distance(100).strength(0.5);
 
 svg.on("mousemove", handleSimOnMouseMove);
 
