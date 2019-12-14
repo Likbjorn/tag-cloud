@@ -17,7 +17,7 @@ const data = {
         {source: "Physics", target: "Statistics"},
         {source: "Economy", target: "Statistics"},
     ]
-}
+};
 
 // constants
 const width = 600, height = 400;
@@ -26,7 +26,7 @@ const interactionRange = 80;
 const gaussBlur = 5;
 
 // mouse position storage
-var mouse = {x: 0, y: 0}
+var mouse = {x: 0, y: 0};
 
 // create svg
 const svg = d3.select("#svg_container")
@@ -89,9 +89,9 @@ const simulation = d3.forceSimulation(data.nodes)
 
 simulation.force("link").distance(100).strength(0);
 
-simulation.force("radial").strength(.5)
+simulation.force("radial").strength(0.5);
 
-svg.on("mousemove", handleSimOnMouseMove)
+svg.on("mousemove", handleSimOnMouseMove);
 
 // add drag functionality
 nodes.call(
@@ -103,7 +103,7 @@ nodes.call(
 
 // handle user interaction
 nodes.selectAll("circle")
-.on("click", handleBubbleOnMouseClick)
+.on("click", handleBubbleOnMouseClick);
 
 
 function ticked() {
@@ -128,7 +128,7 @@ function ticked() {
 
         // blur it
         if (d3.select("#"+node.title) != d3.select(".hovered_circle")) {
-            d3.select(".hovered_circle").classed("hovered_circle", false)
+            d3.select(".hovered_circle").classed("hovered_circle", false);
             //blur_ratio = gaussBlur;
             d3.select("#"+node.title).classed("hovered_circle", true);
             prev_node = node;
@@ -146,7 +146,7 @@ function handleBubbleOnMouseClick() {
         .transition()
         .style("fill", "black")
         .transition()
-        .style("fill", defaultColor)
+        .style("fill", defaultColor);
 }
 
 
