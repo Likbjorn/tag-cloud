@@ -23,6 +23,7 @@ body {
 .tag_circles {
   fill: #ececde;
   transition: all 1s ease-out;
+  cursor: pointer;
 }
 
 .tag_circles:hover {
