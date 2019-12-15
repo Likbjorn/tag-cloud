@@ -52,17 +52,14 @@ blur_filter = svg.append("defs")
 
 // create links and group for them
 links = svg.append("g")
-    .attr("class", "links")
-    .attr("stroke", "grey")
-    .attr("stroke-width", "2px")
     .selectAll("line")
     .data(data.links)
-    .enter().append("line")
     .join(
         enter => enter.append("line"),
         update => update,
         exit => exit.remove()
-    );
+    )
+    .classed("link", true);
 
 // Create svg groups for each node and bind it with data
 // later we can add pretty objects to represent our nodes
