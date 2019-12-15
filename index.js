@@ -6,7 +6,8 @@ const data = {
         {index: 2, title: "Math"},
         {index: 3, title: "Medicine"},
         {index: 4, title: "Economy"},
-        {index: 5, title: "Statistics"}
+        {index: 5, title: "Statistics"},
+        {index: 6, title: "Chemistry"},
     ],
     links: [
         {source: "Physics", target: "Math"},
@@ -16,6 +17,8 @@ const data = {
         {source: "Math", target: "Statistics"},
         {source: "Physics", target: "Statistics"},
         {source: "Economy", target: "Statistics"},
+        {source: "Chemistry", target: "Medicine"},
+        {source: "Chemistry", target: "Physics"},
     ]
 };
 
@@ -86,13 +89,13 @@ nodes.append("text")
 
 // add force simulation
 simulation = d3.forceSimulation(data.nodes)
-    .force("charge", d3.forceManyBody().strength(-100))
+    .force("charge", d3.forceManyBody().strength(-200))
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title))
     .force("collide", d3.forceCollide(r))
     .on("tick", ticked);
 
-simulation.force("link").distance(100).strength(0.5);
+simulation.force("link").distance(120).strength(0.5);
 
 svg.on("mousemove", handleSimOnMouseMove);
 
