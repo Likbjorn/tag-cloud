@@ -109,13 +109,13 @@ nodes.selectAll("circle")
 
 
 function ticked() {
+    // move each node according to forces
+    nodes.attr("transform", moveNode);
+
     links.attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
-
-    // translate node according to forces
-    nodes.attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`);
 
     // find nearest node
     node = simulation.find(mouse.x, mouse.y, interactionRange);
@@ -177,4 +177,18 @@ function dragEnded(d) {
     if (!d3.event.active) simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
+}
+
+
+function moveNode(d) {
+    // move node to position (SVG coordinates)
+
+    // set svg borders
+    if (d.x > width - r) d.x = width - r;
+    if (d.y > height - r) d.y = height - r;
+    if (d.x < r) d.x = r;
+    if (d.y < r) d.y = r;
+
+    // return position
+    return `translate(${d.x}, ${d.y})`;
 }
