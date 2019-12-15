@@ -1,6 +1,6 @@
 // data; not in json file for dev purposes
 const data = {
-    "nodes": [
+    nodes: [
         {index: 0, title: "Physics"},
         {index: 1, title: "Biology"},
         {index: 2, title: "Math"},
@@ -8,7 +8,7 @@ const data = {
         {index: 4, title: "Economy"},
         {index: 5, title: "Statistics"}
     ],
-    "links": [
+    links: [
         {source: "Physics", target: "Math"},
         {source: "Physics", target: "Biology"},
         {source: "Biology", target: "Medicine"},
