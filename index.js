@@ -170,6 +170,9 @@ function dragStarted (d) {
 
 
 function dragged(d) {
+    mouse.x = d3.event.x;
+    mouse.y = d3.event.y;
+
     d.fx = d3.event.x;
     d.fy = d3.event.y;
 }
