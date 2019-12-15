@@ -1,6 +1,6 @@
 // data; not in json file for dev purposes
 const data = {
-    "nodes": [
+    nodes: [
         {index: 0, title: "Physics"},
         {index: 1, title: "Biology"},
         {index: 2, title: "Math"},
@@ -8,7 +8,7 @@ const data = {
         {index: 4, title: "Economy"},
         {index: 5, title: "Statistics"}
     ],
-    "links": [
+    links: [
         {source: "Physics", target: "Math"},
         {source: "Physics", target: "Biology"},
         {source: "Biology", target: "Medicine"},
@@ -17,33 +17,37 @@ const data = {
         {source: "Physics", target: "Statistics"},
         {source: "Economy", target: "Statistics"},
     ]
-}
+};
 
-// constants
-const width = 600, height = 400;
-const r = 40;
-const interactionRange = 80;
-const gaussBlur = 5;
-
-// mouse position storage
-var mouse = {x: 0, y: 0}
+var width = 600,
+    height = 400,
+    r = 40,
+    interactionRange = 80,
+    gaussBlur = 5,
+    mouse = {x: 0, y: 0},
+    svg,
+    nodes,
+    links,
+    simulation,
+    blur_filter,
+    blur_ratio;
 
 // create svg
-const svg = d3.select("#svg_container")
+svg = d3.select("#svg_container")
     .append("svg")
     .attr("width", width)
     .attr("height", height)
     .attr("text-anchor", "middle");
 
 // add a blur filter
-var blur_filter = svg.append("defs")
+blur_filter = svg.append("defs")
     .append("filter")
     .attr("id", "svg_blur")
     .append("feGaussianBlur")
     .attr("stdDeviation", gaussBlur);
 
 // create links and group for them
-var links = svg.append("g")
+links = svg.append("g")
     .attr("class", "links")
     .attr("stroke", "grey")
     .attr("stroke-width", "2px")
@@ -58,7 +62,7 @@ var links = svg.append("g")
 
 // Create svg groups for each node and bind it with data
 // later we can add pretty objects to represent our nodes
-var nodes = svg.selectAll(".node")
+nodes = svg.selectAll(".node")
     .data( data.nodes )
     .join(
         enter => enter.append("g"),
@@ -72,7 +76,6 @@ nodes.append("circle")
     .attr("r", r)
     .attr("class", "tag_circles")
     .attr("id", d => d.title);
-// .attr("fill", defaultColor);
 
 // and create a text label on it basing on title in data.nodes
 nodes.append("text")
@@ -81,17 +84,16 @@ nodes.append("text")
 
 
 // add force simulation
-const simulation = d3.forceSimulation(data.nodes)
-    .force("charge", d3.forceManyBody().strength(-1000))
-    .force("radial", d3.forceRadial(height / 4, width / 2, height / 2))
+simulation = d3.forceSimulation(data.nodes)
+    .force("charge", d3.forceManyBody().strength(-100))
+    .force("center", d3.forceCenter(width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title))
+    .force("collide", d3.forceCollide(r))
     .on("tick", ticked);
 
-simulation.force("link").distance(100).strength(0);
+simulation.force("link").distance(100).strength(0.5);
 
-simulation.force("radial").strength(.5)
-
-svg.on("mousemove", handleSimOnMouseMove)
+svg.on("mousemove", handleSimOnMouseMove);
 
 // add drag functionality
 nodes.call(
@@ -103,17 +105,18 @@ nodes.call(
 
 // handle user interaction
 nodes.selectAll("circle")
-.on("click", handleBubbleOnMouseClick)
+    .on("click", handleBubbleOnMouseClick);
 
 
 function ticked() {
+    // move each node according to forces
+    nodes.attr("transform", moveNode);
+
+    // update links
     links.attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
-
-    // translate node according to forces
-    nodes.attr("transform", d => `translate(${d.x + 1}, ${d.y + 1})`);
 
     // find nearest node
     node = simulation.find(mouse.x, mouse.y, interactionRange);
@@ -128,7 +131,7 @@ function ticked() {
 
         // blur it
         if (d3.select("#"+node.title) != d3.select(".hovered_circle")) {
-            d3.select(".hovered_circle").classed("hovered_circle", false)
+            d3.select(".hovered_circle").classed("hovered_circle", false);
             //blur_ratio = gaussBlur;
             d3.select("#"+node.title).classed("hovered_circle", true);
             prev_node = node;
@@ -146,7 +149,7 @@ function handleBubbleOnMouseClick() {
         .transition()
         .style("fill", "black")
         .transition()
-        .style("fill", defaultColor)
+        .style("fill", defaultColor);
 }
 
 
@@ -175,4 +178,18 @@ function dragEnded(d) {
     if (!d3.event.active) simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
+}
+
+
+function moveNode(d) {
+    // move node to position (SVG coordinates)
+
+    // set svg borders
+    if (d.x > width - r) d.x = width - r;
+    if (d.y > height - r) d.y = height - r;
+    if (d.x < r) d.x = r;
+    if (d.y < r) d.y = r;
+
+    // return position
+    return `translate(${d.x}, ${d.y})`;
 }
