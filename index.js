@@ -137,9 +137,9 @@ function ticked() {
             prev_node = node;
         }
         blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
-        } else if (typeof(prev_node) != "undefined") {
-            d3.select("#"+prev_node.title).classed("hovered_circle", false);
-        }
+    } else if (typeof(prev_node) != "undefined") {
+        d3.select("#"+prev_node.title).classed("hovered_circle", false);
+    }
 }
 
 
