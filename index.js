@@ -76,7 +76,6 @@ nodes.append("circle")
     .attr("r", r)
     .attr("class", "tag_circles")
     .attr("id", d => d.title);
-// .attr("fill", defaultColor);
 
 // and create a text label on it basing on title in data.nodes
 nodes.append("text")
