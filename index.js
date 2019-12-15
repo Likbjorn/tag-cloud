@@ -88,6 +88,7 @@ simulation = d3.forceSimulation(data.nodes)
     .force("charge", d3.forceManyBody().strength(-100))
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force("link", d3.forceLink(data.links).id(d => d.title))
+    .force("collide", d3.forceCollide(r))
     .on("tick", ticked);
 
 simulation.force("link").distance(100).strength(0.5);
@@ -104,13 +105,14 @@ nodes.call(
 
 // handle user interaction
 nodes.selectAll("circle")
-.on("click", handleBubbleOnMouseClick);
+    .on("click", handleBubbleOnMouseClick);
 
 
 function ticked() {
     // move each node according to forces
     nodes.attr("transform", moveNode);
 
+    // update links
     links.attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
