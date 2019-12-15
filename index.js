@@ -19,8 +19,8 @@ const data = {
     ]
 };
 
-var width = 600,
-    height = 400,
+var width = 1024,
+    height = 480,
     r = 40,
     interactionRange = 80,
     gaussBlur = 5,
@@ -35,9 +35,10 @@ var width = 600,
 // create svg
 svg = d3.select("#svg_container")
     .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("text-anchor", "middle");
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("preserveAspectRatio", "xMinYMid meet")
+    .attr("text-anchor", "middle")
+    .classed("svg-content", true);
 
 // add a blur filter
 blur_filter = svg.append("defs")

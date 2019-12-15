@@ -4,6 +4,22 @@ body {
   padding: 0;
 }
 
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 50%; /*aspect ratio 2:1*/
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.svg-content {
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .tag_circles {
   fill: #ececde;
   transition: all 1s ease-out;
