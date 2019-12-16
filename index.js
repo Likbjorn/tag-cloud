@@ -26,6 +26,16 @@ const data = {
     ]
 };
 
+const backgroundData = {
+    nodes: [],
+    links: []
+};
+
+let midData = {
+    nodes: [],
+    links: []
+};
+
 let width = 1024,
     height = 480,
     r = 40,
@@ -48,14 +58,26 @@ svg = d3.select("#svg_container")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "xMinYMid meet")
     .attr("text-anchor", "middle")
-    .classed("svg-content", true)
-    .on("mousemove", handleSimOnMouseMove);
+    .classed("svg-content", true);
 
-backgroundLayer = initLayer(svg, "background-layer");
-middleLayer = initLayer(svg, "middle-layer");
-foregroundLayer = initLayer(svg, "foreground-layer");
+[backgroundLayer, backNodes, backLinks] = initLayer(
+    svg,
+    "background-layer",
+    backgroundData
+);
+[middleLayer, midNodes, midLinks] = initLayer(
+    svg,
+    "middle-layer",
+    midData
+);
+[foregroundLayer, nodes, links] = initLayer(svg,
+    "foreground-layer",
+    data
+);
 
 initForegroundLayer();
+
+svg.on("mousemove", handleSimOnMouseMove);
 
 // add a blur filter
 blur_filter = svg.append("defs")
@@ -154,32 +176,6 @@ function moveNode(d) {
 }
 
 function initForegroundLayer() {
-    // create links and group for them
-    links = foregroundLayer.select("g.link")
-        .selectAll("line")
-        .data(data.links)
-        .join(
-            enter => enter.append("line"),
-            update => update,
-            exit => exit.remove()
-        );
-
-    // Create svg groups for each node and bind it with data
-    nodes = foregroundLayer.selectAll(".node")
-        .data( data.nodes )
-        .join(
-            enter => enter.append("g"),
-            update => update,
-            exit => exit.remove()
-        )
-        .attr("title", d => d.title);
-
-    // append basic circle to each node
-    nodes.append("circle")
-        .attr("r", r)
-        .attr("class", "tag_circles")
-        .attr("id", d => d.title);
-
     // and create a text label on it basing on title in data.nodes
     nodes.append("text")
         .text(d => d.title)
@@ -206,13 +202,38 @@ function initForegroundLayer() {
         .on("tick", ticked);
 
     simulationForeground.force("link").distance(120).strength(0.5);
-
 }
 
 
-function initLayer(svg, layerCSS) {
-    layer = svg.append("g")
+function initLayer(svg, layerCSS, data) {
+    let layer = svg.append("g")
         .classed(layerCSS, true);
     layer.append("g").classed("link", true);
-    return layer;
+
+    let links = layer.select("g.link")
+        .selectAll("line")
+        .data(data.links)
+        .join(
+            enter => enter.append("line"),
+            update => update,
+            exit => exit.remove()
+        );
+
+    // Create svg groups for each node and bind it with data
+    let nodes = layer.selectAll("g.node")
+        .data(data.nodes)
+        .join(
+            enter => enter.append("g"),
+            update => update,
+            exit => exit.remove()
+        )
+    .attr("title", d => d.title);
+
+    // append basic circle to each node
+    nodes.append("circle")
+        .attr("r", d => d.r ? d.r : r) //if nodes.r provided use it, else default
+        .attr("class", "tag_circles")
+        .attr("id", d => d.title);
+
+    return [layer, nodes, links];
 }
