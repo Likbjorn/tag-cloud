@@ -48,14 +48,14 @@ svg = d3.select("#svg_container")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "xMinYMid meet")
     .attr("text-anchor", "middle")
-    .classed("svg-content", true);
+    .classed("svg-content", true)
+    .on("mousemove", handleSimOnMouseMove);
 
-backgroundLayer = svg.append("g")
-    .classed("background-layer", true);
-middleLayer = svg.append("g")
-    .classed("middle-layer", true);
-foregroundLayer = svg.append("g")
-    .classed("foreground-layer", true);
+backgroundLayer = initLayer(svg, "background-layer");
+middleLayer = initLayer(svg, "middle-layer");
+foregroundLayer = initLayer(svg, "foreground-layer");
+
+initForegroundLayer();
 
 // add a blur filter
 blur_filter = svg.append("defs")
@@ -63,65 +63,6 @@ blur_filter = svg.append("defs")
     .attr("id", "svg_blur")
     .append("feGaussianBlur")
     .attr("stdDeviation", gaussBlur);
-
-// create links and group for them
-links = foregroundLayer.append("g")
-    .classed("link", true)
-    .selectAll("line")
-    .data(data.links)
-    .join(
-        enter => enter.append("line"),
-        update => update,
-        exit => exit.remove()
-    );
-
-// Create svg groups for each node and bind it with data
-// later we can add pretty objects to represent our nodes
-nodes = foregroundLayer.selectAll(".node")
-    .data( data.nodes )
-    .join(
-        enter => enter.append("g"),
-        update => update,
-        exit => exit.remove()
-    )
-    .attr("title", d => d.title);
-
-// append basic circle to each node
-nodes.append("circle")
-    .attr("r", r)
-    .attr("class", "tag_circles")
-    .attr("id", d => d.title);
-
-// and create a text label on it basing on title in data.nodes
-nodes.append("text")
-    .text(d => d.title)
-    .style("pointer-events", "none");
-
-
-// add force simulation
-simulation = d3.forceSimulation(data.nodes)
-    .force("charge", d3.forceManyBody().strength(-200))
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("link", d3.forceLink(data.links).id(d => d.title))
-    .force("collide", d3.forceCollide(r))
-    .on("tick", ticked);
-
-simulation.force("link").distance(120).strength(0.5);
-
-svg.on("mousemove", handleSimOnMouseMove);
-
-// add drag functionality
-nodes.call(
-    d3.drag()
-        .on("start", dragStarted)
-        .on("drag", dragged)
-        .on("end", dragEnded)
-);
-
-// handle user interaction
-nodes.selectAll("circle")
-    .on("click", handleBubbleOnMouseClick);
-
 
 function ticked() {
     // move each node according to forces
@@ -210,4 +151,68 @@ function moveNode(d) {
 
     // return position
     return `translate(${d.x}, ${d.y})`;
+}
+
+function initForegroundLayer() {
+    // create links and group for them
+    links = foregroundLayer.select("g.link")
+        .selectAll("line")
+        .data(data.links)
+        .join(
+            enter => enter.append("line"),
+            update => update,
+            exit => exit.remove()
+        );
+
+    // Create svg groups for each node and bind it with data
+    nodes = foregroundLayer.selectAll(".node")
+        .data( data.nodes )
+        .join(
+            enter => enter.append("g"),
+            update => update,
+            exit => exit.remove()
+        )
+        .attr("title", d => d.title);
+
+    // append basic circle to each node
+    nodes.append("circle")
+        .attr("r", r)
+        .attr("class", "tag_circles")
+        .attr("id", d => d.title);
+
+    // and create a text label on it basing on title in data.nodes
+    nodes.append("text")
+        .text(d => d.title)
+        .style("pointer-events", "none");
+
+    // add drag functionality
+    nodes.call(
+        d3.drag()
+            .on("start", dragStarted)
+            .on("drag", dragged)
+            .on("end", dragEnded)
+    );
+
+    // handle user interaction
+    nodes.selectAll("circle")
+        .on("click", handleBubbleOnMouseClick);
+
+    // add force simulation
+    simulation = d3.forceSimulation(data.nodes)
+        .force("charge", d3.forceManyBody().strength(-200))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("link", d3.forceLink(data.links).id(d => d.title))
+        .force("collide", d3.forceCollide(r))
+        .on("tick", ticked);
+
+    simulation.force("link").distance(120).strength(0.5);
+
+}
+
+
+function initLayer(svg, layerCSS) {
+    layer = svg.append("g")
+        .classed(layerCSS, true);
+    layer.append("g").classed("link", true);
+    return layer;
 }
