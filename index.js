@@ -26,6 +26,16 @@ const data = {
     ]
 };
 
+const backgroundData = {
+    nodes: [],
+    links: []
+};
+
+let midData = {
+    nodes: [],
+    links: []
+};
+
 let width = 1024,
     height = 480,
     r = 40,
@@ -38,7 +48,7 @@ let width = 1024,
     backgroundLayer,
     nodes,
     links,
-    simulation,
+    simulationForeground,
     blur_filter,
     blur_ratio;
 
@@ -50,12 +60,24 @@ svg = d3.select("#svg_container")
     .attr("text-anchor", "middle")
     .classed("svg-content", true);
 
-backgroundLayer = svg.append("g")
-    .classed("background-layer", true);
-middleLayer = svg.append("g")
-    .classed("middle-layer", true);
-foregroundLayer = svg.append("g")
-    .classed("foreground-layer", true);
+[backgroundLayer, backNodes, backLinks] = initLayer(
+    svg,
+    "background-layer",
+    backgroundData
+);
+[middleLayer, midNodes, midLinks] = initLayer(
+    svg,
+    "middle-layer",
+    midData
+);
+[foregroundLayer, nodes, links] = initLayer(svg,
+    "foreground-layer",
+    data
+);
+
+initForegroundLayer();
+
+svg.on("mousemove", handleSimOnMouseMove);
 
 // add a blur filter
 blur_filter = svg.append("defs")
@@ -63,65 +85,6 @@ blur_filter = svg.append("defs")
     .attr("id", "svg_blur")
     .append("feGaussianBlur")
     .attr("stdDeviation", gaussBlur);
-
-// create links and group for them
-links = foregroundLayer.append("g")
-    .classed("link", true)
-    .selectAll("line")
-    .data(data.links)
-    .join(
-        enter => enter.append("line"),
-        update => update,
-        exit => exit.remove()
-    );
-
-// Create svg groups for each node and bind it with data
-// later we can add pretty objects to represent our nodes
-nodes = foregroundLayer.selectAll(".node")
-    .data( data.nodes )
-    .join(
-        enter => enter.append("g"),
-        update => update,
-        exit => exit.remove()
-    )
-    .attr("title", d => d.title);
-
-// append basic circle to each node
-nodes.append("circle")
-    .attr("r", r)
-    .attr("class", "tag_circles")
-    .attr("id", d => d.title);
-
-// and create a text label on it basing on title in data.nodes
-nodes.append("text")
-    .text(d => d.title)
-    .style("pointer-events", "none");
-
-
-// add force simulation
-simulation = d3.forceSimulation(data.nodes)
-    .force("charge", d3.forceManyBody().strength(-200))
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .force("link", d3.forceLink(data.links).id(d => d.title))
-    .force("collide", d3.forceCollide(r))
-    .on("tick", ticked);
-
-simulation.force("link").distance(120).strength(0.5);
-
-svg.on("mousemove", handleSimOnMouseMove);
-
-// add drag functionality
-nodes.call(
-    d3.drag()
-        .on("start", dragStarted)
-        .on("drag", dragged)
-        .on("end", dragEnded)
-);
-
-// handle user interaction
-nodes.selectAll("circle")
-    .on("click", handleBubbleOnMouseClick);
-
 
 function ticked() {
     // move each node according to forces
@@ -134,9 +97,9 @@ function ticked() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    node = simulation.find(mouse.x, mouse.y, interactionRange);
+    node = simulationForeground.find(mouse.x, mouse.y, interactionRange);
 
-    if (typeof(node) != "undefined") {
+    if (node) {
         // set node velocity towards cursor
         node.vx = (mouse.x - node.x)*0.05;
         node.vy = (mouse.y - node.y)*0.05;
@@ -169,7 +132,7 @@ function handleBubbleOnMouseClick() {
 
 
 function handleSimOnMouseMove() {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    if (!d3.event.active) simulationForeground.alphaTarget(0.3).restart();
 
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
@@ -177,7 +140,7 @@ function handleSimOnMouseMove() {
 
 
 function dragStarted (d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    if (!d3.event.active) simulationForeground.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
 }
@@ -193,7 +156,7 @@ function dragged(d) {
 
 
 function dragEnded(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
+    if (!d3.event.active) simulationForeground.alphaTarget(0);
     d.fx = null;
     d.fy = null;
 }
@@ -201,13 +164,76 @@ function dragEnded(d) {
 
 function moveNode(d) {
     // move node to position (SVG coordinates)
-
+    let radius = d.r ? d.r : r;
     // set svg borders
-    if (d.x > width - r) d.x = width - r;
-    if (d.y > height - r) d.y = height - r;
-    if (d.x < r) d.x = r;
-    if (d.y < r) d.y = r;
+    if (d.x > width - radius) d.x = width - radius;
+    if (d.y > height - radius) d.y = height - radius;
+    if (d.x < radius) d.x = radius;
+    if (d.y < radius) d.y = radius;
 
     // return position
     return `translate(${d.x}, ${d.y})`;
+}
+
+function initForegroundLayer() {
+    // and create a text label on it basing on title in data.nodes
+    nodes.append("text")
+        .text(d => d.title)
+        .style("pointer-events", "none");
+
+    // add drag functionality
+    nodes.call(
+        d3.drag()
+            .on("start", dragStarted)
+            .on("drag", dragged)
+            .on("end", dragEnded)
+    );
+
+    // handle user interaction
+    nodes.selectAll("circle")
+        .on("click", handleBubbleOnMouseClick);
+
+    // add force simulationForeground
+    simulationForeground = d3.forceSimulation(data.nodes)
+        .force("charge", d3.forceManyBody().strength(-200))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("link", d3.forceLink(data.links).id(d => d.title))
+        .force("collide", d3.forceCollide(r))
+        .on("tick", ticked);
+
+    simulationForeground.force("link").distance(120).strength(0.5);
+}
+
+
+function initLayer(svg, layerCSS, data) {
+    let layer = svg.append("g")
+        .classed(layerCSS, true);
+    layer.append("g").classed("link", true);
+
+    let links = layer.select("g.link")
+        .selectAll("line")
+        .data(data.links)
+        .join(
+            enter => enter.append("line"),
+            update => update,
+            exit => exit.remove()
+        );
+
+    // Create svg groups for each node and bind it with data
+    let nodes = layer.selectAll("g.node")
+        .data(data.nodes)
+        .join(
+            enter => enter.append("g"),
+            update => update,
+            exit => exit.remove()
+        )
+    .attr("title", d => d.title);
+
+    // append basic circle to each node
+    nodes.append("circle")
+        .attr("r", d => d.r ? d.r : r) //if nodes.r provided use it, else default
+        .attr("class", "tag_circles")
+        .attr("id", d => d.title);
+
+    return [layer, nodes, links];
 }
