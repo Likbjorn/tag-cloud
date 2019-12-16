@@ -38,7 +38,7 @@ let width = 1024,
     backgroundLayer,
     nodes,
     links,
-    simulation,
+    simulationForeground,
     blur_filter,
     blur_ratio;
 
@@ -75,7 +75,7 @@ function ticked() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    node = simulation.find(mouse.x, mouse.y, interactionRange);
+    node = simulationForeground.find(mouse.x, mouse.y, interactionRange);
 
     if (typeof(node) != "undefined") {
         // set node velocity towards cursor
@@ -110,7 +110,7 @@ function handleBubbleOnMouseClick() {
 
 
 function handleSimOnMouseMove() {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    if (!d3.event.active) simulationForeground.alphaTarget(0.3).restart();
 
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
@@ -118,7 +118,7 @@ function handleSimOnMouseMove() {
 
 
 function dragStarted (d) {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    if (!d3.event.active) simulationForeground.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
 }
@@ -134,7 +134,7 @@ function dragged(d) {
 
 
 function dragEnded(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
+    if (!d3.event.active) simulationForeground.alphaTarget(0);
     d.fx = null;
     d.fy = null;
 }
@@ -197,15 +197,15 @@ function initForegroundLayer() {
     nodes.selectAll("circle")
         .on("click", handleBubbleOnMouseClick);
 
-    // add force simulation
-    simulation = d3.forceSimulation(data.nodes)
+    // add force simulationForeground
+    simulationForeground = d3.forcesimulationForeground(data.nodes)
         .force("charge", d3.forceManyBody().strength(-200))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .force("collide", d3.forceCollide(r))
         .on("tick", ticked);
 
-    simulation.force("link").distance(120).strength(0.5);
+    simulationForeground.force("link").distance(120).strength(0.5);
 
 }
 
