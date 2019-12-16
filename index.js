@@ -32,7 +32,13 @@ const backgroundData = {
 };
 
 let midData = {
-    nodes: [],
+    nodes: [
+        {title: "Astronomy", r: 20},
+        {title: "Biophysics", r: 30},
+        {title: "Mechanics", r: 25},
+        {title: "Electricity", r: 40},
+        {title: "Hydrodynamics", r: 30}
+    ],
     links: []
 };
 
@@ -97,7 +103,7 @@ function ticked() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    node = simulationForeground.find(mouse.x, mouse.y, interactionRange);
+    let node = simulationForeground.find(mouse.x, mouse.y, interactionRange);
 
     if (node) {
         // set node velocity towards cursor
@@ -125,9 +131,7 @@ function handleBubbleOnMouseClick() {
     // TODO: do better styling here
     d3.select(this)
         .transition()
-        .style("fill", "black")
-        .transition()
-        .style("fill", defaultColor);
+        .style("fill", "black");
 }
 
 
