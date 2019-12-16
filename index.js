@@ -164,12 +164,12 @@ function dragEnded(d) {
 
 function moveNode(d) {
     // move node to position (SVG coordinates)
-
+    let radius = d.r ? d.r : r;
     // set svg borders
-    if (d.x > width - r) d.x = width - r;
-    if (d.y > height - r) d.y = height - r;
-    if (d.x < r) d.x = r;
-    if (d.y < r) d.y = r;
+    if (d.x > width - radius) d.x = width - radius;
+    if (d.y > height - radius) d.y = height - radius;
+    if (d.x < radius) d.x = radius;
+    if (d.y < radius) d.y = radius;
 
     // return position
     return `translate(${d.x}, ${d.y})`;
