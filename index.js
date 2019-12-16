@@ -198,7 +198,7 @@ function initForegroundLayer() {
         .on("click", handleBubbleOnMouseClick);
 
     // add force simulationForeground
-    simulationForeground = d3.forcesimulationForeground(data.nodes)
+    simulationForeground = d3.forceSimulation(data.nodes)
         .force("charge", d3.forceManyBody().strength(-200))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
