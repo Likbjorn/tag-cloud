@@ -99,7 +99,7 @@ function ticked() {
     // find nearest node
     node = simulationForeground.find(mouse.x, mouse.y, interactionRange);
 
-    if (typeof(node) != "undefined") {
+    if (node) {
         // set node velocity towards cursor
         node.vx = (mouse.x - node.x)*0.05;
         node.vy = (mouse.y - node.y)*0.05;
