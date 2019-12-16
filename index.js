@@ -26,13 +26,16 @@ const data = {
     ]
 };
 
-var width = 1024,
+let width = 1024,
     height = 480,
     r = 40,
     interactionRange = 80,
     gaussBlur = 5,
     mouse = {x: 0, y: 0},
     svg,
+    foregroundLayer,
+    middleLayer,
+    backgroundLayer,
     nodes,
     links,
     simulation,
@@ -47,6 +50,13 @@ svg = d3.select("#svg_container")
     .attr("text-anchor", "middle")
     .classed("svg-content", true);
 
+backgroundLayer = svg.append("g")
+    .classed("background-layer", true);
+middleLayer = svg.append("g")
+    .classed("middle-layer", true);
+foregroundLayer = svg.append("g")
+    .classed("foreground-layer", true);
+
 // add a blur filter
 blur_filter = svg.append("defs")
     .append("filter")
@@ -55,19 +65,19 @@ blur_filter = svg.append("defs")
     .attr("stdDeviation", gaussBlur);
 
 // create links and group for them
-links = svg.append("g")
+links = foregroundLayer.append("g")
+    .classed("link", true)
     .selectAll("line")
     .data(data.links)
     .join(
         enter => enter.append("line"),
         update => update,
         exit => exit.remove()
-    )
-    .classed("link", true);
+    );
 
 // Create svg groups for each node and bind it with data
 // later we can add pretty objects to represent our nodes
-nodes = svg.selectAll(".node")
+nodes = foregroundLayer.selectAll(".node")
     .data( data.nodes )
     .join(
         enter => enter.append("g"),
