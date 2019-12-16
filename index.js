@@ -8,6 +8,8 @@ const data = {
         {index: 4, title: "Economy"},
         {index: 5, title: "Statistics"},
         {index: 6, title: "Chemistry"},
+        {index: 7, title: "History"},
+        {index: 8, title: "Literature"},
     ],
     links: [
         {source: "Physics", target: "Math"},
@@ -19,6 +21,8 @@ const data = {
         {source: "Economy", target: "Statistics"},
         {source: "Chemistry", target: "Medicine"},
         {source: "Chemistry", target: "Physics"},
+        {source: "History", target: "Literature"},
+        {source: "History", target: "Economy"},
     ]
 };
 
