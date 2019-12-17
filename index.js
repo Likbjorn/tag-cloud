@@ -1,15 +1,15 @@
 // data; not in json file for dev purposes
-const data = {
+let foregroundData = {
     nodes: [
-        {index: 0, title: "Physics"},
-        {index: 1, title: "Biology"},
-        {index: 2, title: "Math"},
-        {index: 3, title: "Medicine"},
-        {index: 4, title: "Economy"},
-        {index: 5, title: "Statistics"},
-        {index: 6, title: "Chemistry"},
-        {index: 7, title: "History"},
-        {index: 8, title: "Literature"},
+        {title: "Physics"},
+        {title: "Biology"},
+        {title: "Math"},
+        {title: "Medicine"},
+        {title: "Economy"},
+        {title: "Statistics"},
+        {title: "Chemistry"},
+        {title: "History"},
+        {title: "Literature"},
     ],
     links: [
         {source: "Physics", target: "Math"},
@@ -26,15 +26,18 @@ const data = {
     ]
 };
 
-const backgroundData = {
-    nodes: [],
-    links: []
-};
+let subLayerTags = [
+    "Astronomy",
+    "Biophysics",
+    "Mechanics",
+    "Electricity",
+    "Hydrodynamics",
+    "Optics",
+    "Magnetism",
+    "Quantum physics"
+];
 
-let midData = {
-    nodes: [],
-    links: []
-};
+const NUMBER_OF_TAGS = 8;
 
 let width = 1024,
     height = 480,
@@ -51,6 +54,12 @@ let width = 1024,
     simulationForeground,
     blur_filter,
     blur_ratio;
+
+const backgroundData = createDummyData(NUMBER_OF_TAGS);
+
+let midData;
+// set random initial positions
+midData = createDummyData(NUMBER_OF_TAGS);
 
 // create svg
 svg = d3.select("#svg_container")
@@ -72,10 +81,10 @@ svg = d3.select("#svg_container")
 );
 [foregroundLayer, nodes, links] = initLayer(svg,
     "foreground-layer",
-    data
+    foregroundData
 );
 
-initForegroundLayer();
+initForegroundLayer(foregroundData);
 
 svg.on("mousemove", handleSimOnMouseMove);
 
@@ -97,7 +106,7 @@ function ticked() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    node = simulationForeground.find(mouse.x, mouse.y, interactionRange);
+    let node = simulationForeground.find(mouse.x, mouse.y, interactionRange);
 
     if (node) {
         // set node velocity towards cursor
@@ -108,8 +117,8 @@ function ticked() {
         blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
 
         // blur it
-        if (d3.select("#"+node.title) != d3.select(".hovered_circle")) {
-            d3.select(".hovered_circle").classed("hovered_circle", false);
+        if (d3.select("g.foreground-layer#"+node.title) != d3.select("g.foreground-layer > g > .hovered_circle")) {
+            d3.select("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
             //blur_ratio = gaussBlur;
             d3.select("#"+node.title).classed("hovered_circle", true);
             prev_node = node;
@@ -122,12 +131,28 @@ function ticked() {
 
 
 function handleBubbleOnMouseClick() {
-    // TODO: do better styling here
-    d3.select(this)
-        .transition()
-        .style("fill", "black")
-        .transition()
-        .style("fill", defaultColor);
+    foregroundLayer.transition()
+        .attr("opacity", "100%")
+        .duration(2000)
+        .attr("opacity", "0%")
+        .remove();
+    foregroundLayer = middleLayer.classed("middle-layer", false)
+        .classed("foreground-layer", true);
+
+    nodes = midNodes;
+    links = midLinks;
+    foregroundData = midData; // TODO: replace with children data request
+    foregroundData.nodes.forEach(function(node, i) {
+        node.title = subLayerTags[i];
+    });
+
+    midData = createDummyData(NUMBER_OF_TAGS);
+    [middleLayer, midNodes, midLinks] = initLayer(svg,
+        "middle-layer",
+        midData,
+        afterCSS="background-layer");
+
+    initForegroundLayer(foregroundData);
 }
 
 
@@ -175,8 +200,11 @@ function moveNode(d) {
     return `translate(${d.x}, ${d.y})`;
 }
 
-function initForegroundLayer() {
+function initForegroundLayer(data) {
     // and create a text label on it basing on title in data.nodes
+    nodes.attr("title", d => d.title);
+    nodes.select("circle").attr("id", d => d.title);
+
     nodes.append("text")
         .text(d => d.title)
         .style("pointer-events", "none");
@@ -205,9 +233,15 @@ function initForegroundLayer() {
 }
 
 
-function initLayer(svg, layerCSS, data) {
-    let layer = svg.append("g")
-        .classed(layerCSS, true);
+function initLayer(svg, layerCSS, data, afterCSS=null) {
+    let layer;
+    if (afterCSS) {
+        layer = svg.insert("g", `g.${afterCSS} + *`)
+            .classed(layerCSS, true);
+    } else {
+        layer = svg.append("g")
+            .classed(layerCSS, true);
+    }
     layer.append("g").classed("link", true);
 
     let links = layer.select("g.link")
@@ -224,16 +258,39 @@ function initLayer(svg, layerCSS, data) {
         .data(data.nodes)
         .join(
             enter => enter.append("g"),
+                //.attr("title", d => d.title),
             update => update,
             exit => exit.remove()
-        )
-    .attr("title", d => d.title);
+        );
 
     // append basic circle to each node
     nodes.append("circle")
         .attr("r", d => d.r ? d.r : r) //if nodes.r provided use it, else default
-        .attr("class", "tag_circles")
-        .attr("id", d => d.title);
+        .attr("class", "tag_circles");
 
     return [layer, nodes, links];
+}
+
+
+/* util functions*/
+
+function createDummyData(n=NUMBER_OF_TAGS) {
+    // create data with random node coordinates
+    let data = {nodes: [], links: []};
+    for (let i = 0; i < n; i++) {
+        let x = getRandomInt(0, width),
+            y = getRandomInt(0, height);
+        data.nodes.push({
+            x: x,
+            y: y
+        });
+    }
+    return data;
+}
+
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }

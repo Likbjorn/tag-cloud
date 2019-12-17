@@ -21,7 +21,6 @@ body {
 }
 
 .tag_circles {
-  fill: #ececde;
   transition: all 1s ease-out;
   cursor: pointer;
 }
@@ -37,4 +36,24 @@ body {
 .link {
     stroke: #a5a5a5; /* grey */
     stroke-width: 4px;
+}
+
+.background-layer {
+    opacity: 30%;
+    fill: #808080;
+}
+
+.middle-layer {
+    fill: #808080;
+    opacity: 50%;
+}
+
+.foreground-layer {
+    fill: #ececde;
+}
+
+g.foreground-layer > g > text { /* text on tag bubbles */
+    fill: #000000;
+    font-size: 12pt;
+    font-family: "Arial";
 }
