@@ -1,15 +1,15 @@
 // data; not in json file for dev purposes
-const data = {
+let foregroundData = {
     nodes: [
-        {index: 0, title: "Physics"},
-        {index: 1, title: "Biology"},
-        {index: 2, title: "Math"},
-        {index: 3, title: "Medicine"},
-        {index: 4, title: "Economy"},
-        {index: 5, title: "Statistics"},
-        {index: 6, title: "Chemistry"},
-        {index: 7, title: "History"},
-        {index: 8, title: "Literature"},
+        {title: "Physics"},
+        {title: "Biology"},
+        {title: "Math"},
+        {title: "Medicine"},
+        {title: "Economy"},
+        {title: "Statistics"},
+        {title: "Chemistry"},
+        {title: "History"},
+        {title: "Literature"},
     ],
     links: [
         {source: "Physics", target: "Math"},
