@@ -252,7 +252,7 @@ function initForegroundLayer(data) {
     // add force simulationForeground
     simulationForeground = d3.forceSimulation(data.nodes)
         .force("charge", d3.forceManyBody().strength(-100))
-        //.force("center", d3.forceCenter(width / 2, height / 2))
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
@@ -263,8 +263,9 @@ function initForegroundLayer(data) {
 
 function initMidLayer(data) {
     simulationMiddle = d3.forceSimulation(data.nodes)
-        .force("chargeMid", d3.forceManyBody().strength(-1000))
-        .force("collideMid", d3.forceCollide(r).strength(0.5))
+        .force("charge", d3.forceManyBody().strength(-100))
+        .force("collide", d3.forceCollide(r).strength(0.5))
+        .force("center", d3.forceCenter(width/2, height/2))
         .on("tick", tickedMid);
 }
 
