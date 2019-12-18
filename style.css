@@ -22,7 +22,6 @@ body {
 
 .tag_circles {
   transition: all 1s ease-out;
-  cursor: pointer;
 }
 
 .tag_circles:hover {
@@ -31,6 +30,7 @@ body {
 .hovered_circle {
     fill: #3ac7f5;
     filter: url(#svg_blur);
+    cursor: pointer;
 }
 
 .link {
@@ -39,13 +39,15 @@ body {
 }
 
 .background-layer {
-    opacity: 30%;
+    fill-opacity: 0%;
+    stroke-opacity: 0%;
     fill: #808080;
 }
 
 .middle-layer {
     fill: #808080;
-    opacity: 50%;
+    fill-opacity: 50%;
+    stroke-opacity: 0%;
 }
 
 .foreground-layer {
@@ -56,4 +58,6 @@ g.foreground-layer > g > text { /* text on tag bubbles */
     fill: #000000;
     font-size: 12pt;
     font-family: "Arial";
+    fill-opacity: 100%;
+    stroke-opacity: 0%;
 }
