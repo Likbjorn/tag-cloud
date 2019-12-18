@@ -51,7 +51,13 @@ let width = 1024,
     backgroundLayer,
     nodes,
     links,
+    midNodes,
+    midLinks,
+    backNodes,
+    backLinks,
     simulationForeground,
+    simulationMiddle,
+    simulationBack,
     blur_filter,
     blur_ratio;
 
@@ -60,6 +66,8 @@ const backgroundData = createDummyData(NUMBER_OF_TAGS);
 let midData;
 // set random initial positions
 midData = createDummyData(NUMBER_OF_TAGS);
+
+initData(foregroundData);
 
 // create svg
 svg = d3.select("#svg_container")
@@ -85,6 +93,7 @@ svg = d3.select("#svg_container")
 );
 
 initForegroundLayer(foregroundData);
+initMidLayer(midData);
 
 svg.on("mousemove", handleSimOnMouseMove);
 
@@ -130,6 +139,18 @@ function ticked() {
 }
 
 
+function tickedMid() {
+    midNodes.attr("transform", moveNode);
+
+    // update links
+    midLinks.attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+}
+
+
 function handleBubbleOnMouseClick() {
     foregroundLayer
         .transition()
@@ -156,6 +177,7 @@ function handleBubbleOnMouseClick() {
     midNodes.attr("transform", moveNode);
 
     initForegroundLayer(foregroundData);
+    initMidLayer(midData);
 }
 
 
@@ -192,12 +214,12 @@ function dragEnded(d) {
 
 function moveNode(d) {
     // move node to position (SVG coordinates)
-    let radius = d.r ? d.r : r;
+
     // set svg borders
-    if (d.x > width - radius) d.x = width - radius;
-    if (d.y > height - radius) d.y = height - radius;
-    if (d.x < radius) d.x = radius;
-    if (d.y < radius) d.y = radius;
+    if (d.x > width - d.r) d.x = width - d.r;
+    if (d.y > height - d.r) d.y = height - d.r;
+    if (d.x < d.r) d.x = d.r;
+    if (d.y < d.r) d.y = d.r;
 
     // return position
     return `translate(${d.x}, ${d.y})`;
@@ -236,6 +258,14 @@ function initForegroundLayer(data) {
 }
 
 
+function initMidLayer(data) {
+    simulationMiddle = d3.forceSimulation(data.nodes)
+        .force("chargeMid", d3.forceManyBody().strength(-1000))
+        .force("collideMid", d3.forceCollide(r).strength(0.5))
+        .on("tick", tickedMid);
+}
+
+
 function createLayer(svg, layerCSS, data, afterCSS=null) {
     let layer;
     if (afterCSS) {
@@ -261,7 +291,6 @@ function createLayer(svg, layerCSS, data, afterCSS=null) {
         .data(data.nodes)
         .join(
             enter => enter.append("g"),
-                //.attr("title", d => d.title),
             update => update,
             exit => exit.remove()
         )
@@ -300,4 +329,15 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+function initData(data) {
+    // add missing properties if any
+    data.nodes.forEach(function(node) {
+        node.x = node.x ? node.x : width/2;
+        node.y = node.y ? node.y : height/2;
+        node.r = node.r ? node.r : r;
+    });
+    return data;
 }
