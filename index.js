@@ -1,15 +1,15 @@
 // data; not in json file for dev purposes
 let foregroundData = {
     nodes: [
-        {title: "Physics"},
-        {title: "Biology"},
-        {title: "Math"},
-        {title: "Medicine"},
-        {title: "Economy"},
-        {title: "Statistics"},
-        {title: "Chemistry"},
-        {title: "History"},
-        {title: "Literature"},
+        {title: "Physics", r: 50},
+        {title: "Biology", r: 40},
+        {title: "Math", r: 60},
+        {title: "Medicine", r: 45},
+        {title: "Economy", r: 45},
+        {title: "Statistics", r: 55},
+        {title: "Chemistry", r: 50},
+        {title: "History", r: 40},
+        {title: "Literature", r: 55},
     ],
     links: [
         {source: "Physics", target: "Math"},
@@ -34,14 +34,14 @@ let subLayerTags = [
     "Hydrodynamics",
     "Optics",
     "Magnetism",
-    "Quantum physics"
+    "Geophysics",
 ];
 
 const NUMBER_OF_TAGS = 8;
 
 let width = 1024,
     height = 480,
-    r = 40,
+    r = 50,
     interactionRange = 80,
     gaussBlur = 5,
     mouse = {x: 0, y: 0},
@@ -69,17 +69,17 @@ svg = d3.select("#svg_container")
     .attr("text-anchor", "middle")
     .classed("svg-content", true);
 
-[backgroundLayer, backNodes, backLinks] = initLayer(
+[backgroundLayer, backNodes, backLinks] = createLayer(
     svg,
     "background-layer",
     backgroundData
 );
-[middleLayer, midNodes, midLinks] = initLayer(
+[middleLayer, midNodes, midLinks] = createLayer(
     svg,
     "middle-layer",
     midData
 );
-[foregroundLayer, nodes, links] = initLayer(svg,
+[foregroundLayer, nodes, links] = createLayer(svg,
     "foreground-layer",
     foregroundData
 );
@@ -131,11 +131,13 @@ function ticked() {
 
 
 function handleBubbleOnMouseClick() {
-    foregroundLayer.transition()
-        .attr("opacity", "100%")
-        .duration(2000)
-        .attr("opacity", "0%")
+    foregroundLayer
+        .transition()
+        .duration(1000)
+        .attr("fill-opacity", "0%")
+        .attr("stroke-opacity", "0%")
         .remove();
+
     foregroundLayer = middleLayer.classed("middle-layer", false)
         .classed("foreground-layer", true);
 
@@ -147,10 +149,11 @@ function handleBubbleOnMouseClick() {
     });
 
     midData = createDummyData(NUMBER_OF_TAGS);
-    [middleLayer, midNodes, midLinks] = initLayer(svg,
+    [middleLayer, midNodes, midLinks] = createLayer(svg,
         "middle-layer",
         midData,
         afterCSS="background-layer");
+    midNodes.attr("transform", moveNode);
 
     initForegroundLayer(foregroundData);
 }
@@ -223,17 +226,17 @@ function initForegroundLayer(data) {
 
     // add force simulationForeground
     simulationForeground = d3.forceSimulation(data.nodes)
-        .force("charge", d3.forceManyBody().strength(-200))
-        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("charge", d3.forceManyBody().strength(-100))
+        //.force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
-        .force("collide", d3.forceCollide(r))
+        .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
 
     simulationForeground.force("link").distance(120).strength(0.5);
 }
 
 
-function initLayer(svg, layerCSS, data, afterCSS=null) {
+function createLayer(svg, layerCSS, data, afterCSS=null) {
     let layer;
     if (afterCSS) {
         layer = svg.insert("g", `g.${afterCSS} + *`)
@@ -261,10 +264,12 @@ function initLayer(svg, layerCSS, data, afterCSS=null) {
                 //.attr("title", d => d.title),
             update => update,
             exit => exit.remove()
-        );
+        )
+        .attr("transform", moveNode);
 
     // append basic circle to each node
     nodes.append("circle")
+        .transition().duration(100)
         .attr("r", d => d.r ? d.r : r) //if nodes.r provided use it, else default
         .attr("class", "tag_circles");
 
@@ -279,10 +284,12 @@ function createDummyData(n=NUMBER_OF_TAGS) {
     let data = {nodes: [], links: []};
     for (let i = 0; i < n; i++) {
         let x = getRandomInt(0, width),
-            y = getRandomInt(0, height);
+            y = getRandomInt(0, height),
+            rad = getRandomInt(r, r+20);
         data.nodes.push({
             x: x,
-            y: y
+            y: y,
+            r: rad
         });
     }
     return data;
