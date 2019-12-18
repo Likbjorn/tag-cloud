@@ -152,6 +152,7 @@ function tickedMid() {
 
 
 function handleBubbleOnMouseClick() {
+    // do pretty transition
     foregroundLayer
         .transition()
         .duration(1000)
@@ -159,16 +160,17 @@ function handleBubbleOnMouseClick() {
         .attr("stroke-opacity", "0%")
         .remove();
 
+    // promote middle layer
     foregroundLayer = middleLayer.classed("middle-layer", false)
         .classed("foreground-layer", true);
+    [foregroundData, nodes, links] = [midData, midNodes, midLinks];
 
-    nodes = midNodes;
-    links = midLinks;
-    foregroundData = midData; // TODO: replace with children data request
+    // TODO: Add children data request and fill "title" attribute in data
     foregroundData.nodes.forEach(function(node, i) {
         node.title = subLayerTags[i];
     });
 
+    // create new middle layer
     midData = createDummyData(NUMBER_OF_TAGS);
     [middleLayer, midNodes, midLinks] = createLayer(svg,
         "middle-layer",
@@ -176,6 +178,7 @@ function handleBubbleOnMouseClick() {
         afterCSS="background-layer");
     midNodes.attr("transform", moveNode);
 
+    // init layers
     initForegroundLayer(foregroundData);
     initMidLayer(midData);
 }
@@ -269,13 +272,13 @@ function initMidLayer(data) {
 function createLayer(svg, layerCSS, data, afterCSS=null) {
     let layer;
     if (afterCSS) {
-        layer = svg.insert("g", `g.${afterCSS} + *`)
-            .classed(layerCSS, true);
+        layer = svg.insert("g", `g.${afterCSS} + *`);
     } else {
-        layer = svg.append("g")
-            .classed(layerCSS, true);
+        layer = svg.append("g");
     }
-    layer.append("g").classed("link", true);
+    layer.classed(layerCSS, true)
+        .append("g")
+        .classed("link", true);
 
     let links = layer.select("g.link")
         .selectAll("line")
