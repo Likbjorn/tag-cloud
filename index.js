@@ -69,7 +69,7 @@ midData = createDummyData(NUMBER_OF_TAGS);
 
 initData(foregroundData);
 
-// create svg
+// create svg - probably can be done in index.html
 svg = d3.select("#svg_container")
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
@@ -77,6 +77,7 @@ svg = d3.select("#svg_container")
     .attr("text-anchor", "middle")
     .classed("svg-content", true);
 
+// create layers
 [backgroundLayer, backNodes, backLinks] = createLayer(
     svg,
     "background-layer",
@@ -92,6 +93,7 @@ svg = d3.select("#svg_container")
     foregroundData
 );
 
+// init data and forces on layers
 initForegroundLayer(foregroundData);
 initMidLayer(midData);
 
@@ -105,6 +107,8 @@ blur_filter = svg.append("defs")
     .attr("stdDeviation", gaussBlur);
 
 function ticked() {
+    // foreground layer
+
     // move each node according to forces
     nodes.attr("transform", moveNode);
 
