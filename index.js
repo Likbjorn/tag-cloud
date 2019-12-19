@@ -153,11 +153,16 @@ function tickedMid() {
 
 function handleBubbleOnMouseClick() {
     // do pretty transition
+    foregroundLayer.selectAll("text")
+        .attr("fill-opacity", 1)
+        .transition()
+        .duration(1000)
+        .attr("fill-opacity", 0);
     foregroundLayer
         .transition()
         .duration(1000)
-        .attr("fill-opacity", "0%")
-        .attr("stroke-opacity", "0%")
+        .attr("fill-opacity", 0)
+        .attr("stroke-opacity", 0)
         .remove();
 
     // promote middle layer
