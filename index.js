@@ -153,14 +153,13 @@ function tickedMid() {
 
 function handleBubbleOnMouseClick() {
     // do pretty transition
-    foregroundLayer.selectAll("text")
-        .attr("fill-opacity", 1)
+    foregroundLayer.selectAll("text") // text does not inherit opacity for some reason
         .transition()
-        .duration(1000)
-        .attr("fill-opacity", 0);
+        .duration(500)
+        .attr("opacity", 0);
     foregroundLayer
         .transition()
-        .duration(1000)
+        .duration(500)
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 0)
         .remove();
@@ -239,8 +238,7 @@ function initForegroundLayer(data) {
     nodes.select("circle").attr("id", d => d.title);
 
     nodes.append("text")
-        .text(d => d.title)
-        .style("pointer-events", "none");
+        .text(d => d.title);
 
     // add drag functionality
     nodes.call(
