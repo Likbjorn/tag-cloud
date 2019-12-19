@@ -21,7 +21,7 @@ body {
 }
 
 .tag_circles {
-  transition: all 1s ease-out;
+  transition: all 500ms ease-out;
 }
 
 .tag_circles:hover {
@@ -58,6 +58,7 @@ g.foreground-layer > g > text { /* text on tag bubbles */
     fill: #000000;
     font-size: 12pt;
     font-family: "Arial";
-    fill-opacity: 100%;
-    stroke-opacity: 0%;
+    opacity: 100%;
+    pointer-events: none;
+    transition: all 500ms ease-out;
 }

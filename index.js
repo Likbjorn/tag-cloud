@@ -51,7 +51,13 @@ let width = 1024,
     backgroundLayer,
     nodes,
     links,
+    midNodes,
+    midLinks,
+    backNodes,
+    backLinks,
     simulationForeground,
+    simulationMiddle,
+    simulationBack,
     blur_filter,
     blur_ratio;
 
@@ -61,7 +67,9 @@ let midData;
 // set random initial positions
 midData = createDummyData(NUMBER_OF_TAGS);
 
-// create svg
+initData(foregroundData);
+
+// create svg - probably can be done in index.html
 svg = d3.select("#svg_container")
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
@@ -69,6 +77,7 @@ svg = d3.select("#svg_container")
     .attr("text-anchor", "middle")
     .classed("svg-content", true);
 
+// create layers
 [backgroundLayer, backNodes, backLinks] = createLayer(
     svg,
     "background-layer",
@@ -84,7 +93,9 @@ svg = d3.select("#svg_container")
     foregroundData
 );
 
+// init data and forces on layers
 initForegroundLayer(foregroundData);
+initMidLayer(midData);
 
 svg.on("mousemove", handleSimOnMouseMove);
 
@@ -96,6 +107,8 @@ blur_filter = svg.append("defs")
     .attr("stdDeviation", gaussBlur);
 
 function ticked() {
+    // foreground layer
+
     // move each node according to forces
     nodes.attr("transform", moveNode);
 
@@ -130,24 +143,42 @@ function ticked() {
 }
 
 
+function tickedMid() {
+    midNodes.attr("transform", moveNode);
+
+    // update links
+    midLinks.attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+}
+
+
 function handleBubbleOnMouseClick() {
+    // do pretty transition
+    foregroundLayer.selectAll("text") // text does not inherit opacity for some reason
+        .transition()
+        .duration(500)
+        .attr("opacity", 0);
     foregroundLayer
         .transition()
-        .duration(1000)
-        .attr("fill-opacity", "0%")
-        .attr("stroke-opacity", "0%")
+        .duration(500)
+        .attr("fill-opacity", 0)
+        .attr("stroke-opacity", 0)
         .remove();
 
+    // promote middle layer
     foregroundLayer = middleLayer.classed("middle-layer", false)
         .classed("foreground-layer", true);
+    [foregroundData, nodes, links] = [midData, midNodes, midLinks];
 
-    nodes = midNodes;
-    links = midLinks;
-    foregroundData = midData; // TODO: replace with children data request
+    // TODO: Add children data request and fill "title" attribute in data
     foregroundData.nodes.forEach(function(node, i) {
         node.title = subLayerTags[i];
     });
 
+    // create new middle layer
     midData = createDummyData(NUMBER_OF_TAGS);
     [middleLayer, midNodes, midLinks] = createLayer(svg,
         "middle-layer",
@@ -155,7 +186,9 @@ function handleBubbleOnMouseClick() {
         afterCSS="background-layer");
     midNodes.attr("transform", moveNode);
 
+    // init layers
     initForegroundLayer(foregroundData);
+    initMidLayer(midData);
 }
 
 
@@ -192,12 +225,12 @@ function dragEnded(d) {
 
 function moveNode(d) {
     // move node to position (SVG coordinates)
-    let radius = d.r ? d.r : r;
+
     // set svg borders
-    if (d.x > width - radius) d.x = width - radius;
-    if (d.y > height - radius) d.y = height - radius;
-    if (d.x < radius) d.x = radius;
-    if (d.y < radius) d.y = radius;
+    if (d.x > width - d.r) d.x = width - d.r;
+    if (d.y > height - d.r) d.y = height - d.r;
+    if (d.x < d.r) d.x = d.r;
+    if (d.y < d.r) d.y = d.r;
 
     // return position
     return `translate(${d.x}, ${d.y})`;
@@ -209,8 +242,7 @@ function initForegroundLayer(data) {
     nodes.select("circle").attr("id", d => d.title);
 
     nodes.append("text")
-        .text(d => d.title)
-        .style("pointer-events", "none");
+        .text(d => d.title);
 
     // add drag functionality
     nodes.call(
@@ -227,7 +259,7 @@ function initForegroundLayer(data) {
     // add force simulationForeground
     simulationForeground = d3.forceSimulation(data.nodes)
         .force("charge", d3.forceManyBody().strength(-100))
-        //.force("center", d3.forceCenter(width / 2, height / 2))
+        .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
@@ -236,16 +268,25 @@ function initForegroundLayer(data) {
 }
 
 
+function initMidLayer(data) {
+    simulationMiddle = d3.forceSimulation(data.nodes)
+        .force("charge", d3.forceManyBody().strength(-100))
+        .force("collide", d3.forceCollide(r).strength(0.5))
+        .force("center", d3.forceCenter(width/2, height/2))
+        .on("tick", tickedMid);
+}
+
+
 function createLayer(svg, layerCSS, data, afterCSS=null) {
     let layer;
     if (afterCSS) {
-        layer = svg.insert("g", `g.${afterCSS} + *`)
-            .classed(layerCSS, true);
+        layer = svg.insert("g", `g.${afterCSS} + *`);
     } else {
-        layer = svg.append("g")
-            .classed(layerCSS, true);
+        layer = svg.append("g");
     }
-    layer.append("g").classed("link", true);
+    layer.classed(layerCSS, true)
+        .append("g")
+        .classed("link", true);
 
     let links = layer.select("g.link")
         .selectAll("line")
@@ -261,7 +302,6 @@ function createLayer(svg, layerCSS, data, afterCSS=null) {
         .data(data.nodes)
         .join(
             enter => enter.append("g"),
-                //.attr("title", d => d.title),
             update => update,
             exit => exit.remove()
         )
@@ -300,4 +340,15 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+function initData(data) {
+    // add missing properties if any
+    data.nodes.forEach(function(node) {
+        node.x = node.x ? node.x : width/2;
+        node.y = node.y ? node.y : height/2;
+        node.r = node.r ? node.r : r;
+    });
+    return data;
 }
