@@ -46,18 +46,10 @@ let width = 1024,
     gaussBlur = 5,
     mouse = {x: 0, y: 0},
     svg,
-    foregroundLayer,
-    middleLayer,
-    backgroundLayer,
-    nodes,
-    links,
-    midNodes,
-    midLinks,
-    backNodes,
-    backLinks,
-    simulationForeground,
-    simulationMiddle,
-    simulationBack,
+    foregroundLayer, middleLayer, backgroundLayer,
+    nodes, midNodes, backNodes,
+    links, midLinks, backLinks,
+    simulationForeground, simulationMiddle, simulationBack,
     blur_filter,
     blur_ratio;
 
@@ -180,6 +172,7 @@ function handleBubbleOnMouseClick() {
 
     // create new middle layer
     midData = createDummyData(NUMBER_OF_TAGS);
+
     [middleLayer, midNodes, midLinks] = createLayer(svg,
         "middle-layer",
         midData,
@@ -264,7 +257,7 @@ function initForegroundLayer(data) {
         .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
 
-    simulationForeground.force("link").distance(120).strength(0.5);
+    simulationForeground.force("link").distance(200).strength(0.5);
 }
 
 
@@ -273,7 +266,9 @@ function initMidLayer(data) {
         .force("charge", d3.forceManyBody().strength(-100))
         .force("collide", d3.forceCollide(r).strength(0.5))
         .force("center", d3.forceCenter(width/2, height/2))
+        .force("link", d3.forceLink(data.links).id(d => d.title))
         .on("tick", tickedMid);
+    simulationMiddle.force("link").distance(200).strength(0.5);
 }
 
 
@@ -316,9 +311,6 @@ function createLayer(svg, layerCSS, data, afterCSS=null) {
     return [layer, nodes, links];
 }
 
-
-/* util functions*/
-
 function createDummyData(n=NUMBER_OF_TAGS) {
     // create data with random node coordinates
     let data = {nodes: [], links: []};
@@ -332,7 +324,32 @@ function createDummyData(n=NUMBER_OF_TAGS) {
             r: rad
         });
     }
+
+    createDummyLinks(data);
+
     return data;
+}
+
+
+function createDummyLinks(data, probability=0.2) {
+    data.links = [];
+    let nodes_to_link = [];
+
+    data.nodes.forEach(function(node) {
+        nodes_to_link.push(node);
+    });
+
+    const n = nodes_to_link.length;
+    for (let i = 0; i < n - 1; i++) {
+        for (let j = i + 1; j < n; j++) {
+            if (Math.random() <= probability) {
+                data.links.push({
+                    source: nodes_to_link[i],
+                    target: nodes_to_link[j]}
+                );
+            }
+        }
+    }
 }
 
 
