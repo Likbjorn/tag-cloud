@@ -333,19 +333,13 @@ function createDummyData(n=NUMBER_OF_TAGS) {
 
 function createDummyLinks(data, probability=0.2) {
     data.links = [];
-    let nodes_to_link = [];
 
-    data.nodes.forEach(function(node) {
-        nodes_to_link.push(node);
-    });
-
-    const n = nodes_to_link.length;
-    for (let i = 0; i < n - 1; i++) {
-        for (let j = i + 1; j < n; j++) {
+    for (let i = 0; i < data.nodes.length - 1; i++) {
+        for (let j = i + 1; j < data.nodes.length; j++) {
             if (Math.random() <= probability) {
                 data.links.push({
-                    source: nodes_to_link[i],
-                    target: nodes_to_link[j]}
+                    source: data.nodes[i],
+                    target: data.nodes[j]}
                 );
             }
         }
