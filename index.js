@@ -267,7 +267,7 @@ function initForegroundLayer(data) {
         .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
 
-    simulationForeground.force("link").distance(120).strength(0.5);
+    simulationForeground.force("link").distance(200).strength(0.5);
 }
 
 
@@ -278,7 +278,7 @@ function initMidLayer(data) {
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .on("tick", tickedMid);
-
+    simulationMiddle.force("link").distance(200).strength(0.5);
 }
 
 
