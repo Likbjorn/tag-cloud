@@ -66,7 +66,6 @@ const backgroundData = createDummyData(NUMBER_OF_TAGS);
 let midData;
 // set random initial positions
 midData = createDummyData(NUMBER_OF_TAGS);
-createDummyLinks(midData);
 
 initData(foregroundData);
 
@@ -181,7 +180,6 @@ function handleBubbleOnMouseClick() {
 
     // create new middle layer
     midData = createDummyData(NUMBER_OF_TAGS);
-    createDummyLinks(midData);
 
     [middleLayer, midNodes, midLinks] = createLayer(svg,
         "middle-layer",
@@ -334,6 +332,9 @@ function createDummyData(n=NUMBER_OF_TAGS) {
             r: rad
         });
     }
+
+    createDummyLinks(data);
+
     return data;
 }
 
