@@ -1,5 +1,17 @@
 const NUMBER_OF_TAGS = 8; // default number of middle nodes
 
+let r = 50, // px
+    linkLength = 0.35, // relative to viewport height
+    interactionRange = 80, // px
+    gaussBlur = 5,
+    mouse = {x: 0, y: 0},
+    width,
+    height,
+    svg, svgContainer,
+    layers,
+    blur_filter,
+    blur_ratio;
+
 // data; not in json file for dev purposes
 let data = {};
 data["foreground"] = {
@@ -28,7 +40,11 @@ data["foreground"] = {
         {source: "History", target: "Economy"},
     ]
 };
+data["background"] = createDummyData(NUMBER_OF_TAGS);
+data["middle"] = createDummyData(NUMBER_OF_TAGS);
+initData(data["foreground"]);
 
+// placeholder for next layer tags
 let subLayerTags = [
     "Astronomy",
     "Biophysics",
@@ -40,27 +56,10 @@ let subLayerTags = [
     "Geophysics",
 ];
 
-let r = 50, // px
-    linkLength = 0.35, // relative to viewport height
-    interactionRange = 80, // px
-    gaussBlur = 5,
-    mouse = {x: 0, y: 0},
-    width,
-    height,
-    svg, svgContainer,
-    layers,
-    blur_filter,
-    blur_ratio;
-
 // get svgContainer <div> and init svg size
 svgContainer = document.getElementById("svg_container");
 width = svgContainer.clientWidth;
 height = svgContainer.clientHeight;
-
-data["background"] = createDummyData(NUMBER_OF_TAGS);
-data["middle"] = createDummyData(NUMBER_OF_TAGS);
-
-initData(data["foreground"]);
 
 // get svgContainer <div> and init svg size
 svgContainer = document.getElementById("svg_container");
@@ -107,7 +106,8 @@ function ticked() {
     layers["foreground"].nodes.attr("transform", moveNode);
 
     // update links
-    layers["foreground"].links.attr("x1", d => d.source.x)
+    layers["foreground"].links
+        .attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
@@ -141,7 +141,8 @@ function tickedMid() {
     layers["middle"].nodes.attr("transform", moveNode);
 
     // update links
-    layers["middle"].links.attr("x1", d => d.source.x)
+    layers["middle"].links
+        .attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
@@ -214,6 +215,8 @@ function onResize() {
     layers["middle"].simulation.force("center")
         .x(width/2)
         .y(height/2);
+    layers["foreground"].simulation.force("link")
+        .distance(height*linkLength)
 
     restartSimulations();
 }
@@ -254,6 +257,7 @@ function moveNode(d) {
     // return position
     return `translate(${d.x}, ${d.y})`;
 }
+
 
 function initForegroundLayer() {
     // and create a text label on it basing on title in data.nodes
@@ -351,6 +355,7 @@ function createLayer(layerCSS, data, afterCSS=null) {
     };
 }
 
+
 function createDummyData(n=NUMBER_OF_TAGS) {
     // create data with random node coordinates
     let data = {nodes: [], links: []};
@@ -406,7 +411,6 @@ function initData(data) {
 
 
 function restartSimulations() {
-    //simulationBack.alphaTarget(0.3).restart();
     layers["middle"].simulation.alphaTarget(0.3).restart();
     layers["foreground"].simulation.alphaTarget(0.3).restart();
 }
