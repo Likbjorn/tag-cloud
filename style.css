@@ -47,7 +47,7 @@ body {
 .middle-layer {
     fill: #808080;
     fill-opacity: 50%;
-    stroke-opacity: 0%;
+    stroke-opacity: 20%;
 }
 
 .foreground-layer {
