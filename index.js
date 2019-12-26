@@ -202,6 +202,8 @@ function onNodeClick() {
 }
 
 
+function onMouseMove() {
+    if (!d3.event.active) restartSimulations();
 
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
@@ -225,10 +227,13 @@ function onResize() {
     simulationMiddle.force("center")
         .x(width/2)
         .y(height/2);
+
+    restartSimulations();
 }
 
 
 function dragStarted (d) {
+    if (!d3.event.active) restartSimulations();
     d.fx = d.x;
     d.fy = d.y;
 }
@@ -396,4 +401,11 @@ function initData(data) {
         node.r = node.r ? node.r : r;
     });
     return data;
+}
+
+
+function restartSimulations() {
+    //simulationBack.alphaTarget(0.3).restart();
+    simulationMiddle.alphaTarget(0.3).restart();
+    simulationForeground.alphaTarget(0.3).restart();
 }
