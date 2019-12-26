@@ -39,12 +39,13 @@ let subLayerTags = [
 
 const NUMBER_OF_TAGS = 8;
 
-let width,
-    height,
-    r = 50,
-    interactionRange = 80,
+let r = 50, // px
+    linkLength = 0.35, // relative to viewport height
+    interactionRange = 80, // px
     gaussBlur = 5,
     mouse = {x: 0, y: 0},
+    width,
+    height,
     svg, svgContainer,
     foregroundLayer, middleLayer, backgroundLayer,
     nodes, midNodes, backNodes,
@@ -223,7 +224,7 @@ function onResize() {
         .x(width/2)
         .y(height/2);
     simulationForeground.force("link")
-        .distance(height/4)
+        .distance(height*linkLength)
     simulationMiddle.force("center")
         .x(width/2)
         .y(height/2);
@@ -296,7 +297,7 @@ function initForegroundLayer(data) {
         .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
 
-    simulationForeground.force("link").distance(height/4).strength(0.5);
+    simulationForeground.force("link").distance(height*linkLength).strength(0.5);
 }
 
 
@@ -307,7 +308,7 @@ function initMidLayer(data) {
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .on("tick", tickedMid);
-    simulationMiddle.force("link").distance(200).strength(0.5);
+    simulationMiddle.force("link").distance(height*linkLength).strength(0.5);
 }
 
 
