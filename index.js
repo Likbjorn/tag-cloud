@@ -61,11 +61,6 @@ svgContainer = document.getElementById("svg_container");
 width = svgContainer.clientWidth;
 height = svgContainer.clientHeight;
 
-// get svgContainer <div> and init svg size
-svgContainer = document.getElementById("svg_container");
-width = svgContainer.clientWidth;
-height = svgContainer.clientHeight;
-
 // create svg - probably can be done in index.html
 svg = d3.select("#svg_container")
     .append("svg")
