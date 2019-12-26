@@ -9,6 +9,7 @@ let r = 50, // px
     height,
     svg, svgContainer,
     layers,
+    prev_node,
     blur_filter,
     blur_ratio;
 
@@ -110,7 +111,6 @@ function ticked() {
 
     // find nearest node
     let node = layers.foreground.simulation.find(mouse.x, mouse.y, interactionRange);
-    let prev_node;
 
     if (node) {
         // set node velocity towards cursor
