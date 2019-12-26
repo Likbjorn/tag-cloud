@@ -12,6 +12,11 @@ let r = 50, // px
     blur_filter,
     blur_ratio;
 
+// get svgContainer <div> and init svg size
+svgContainer = document.getElementById("svg_container");
+width = svgContainer.clientWidth;
+height = svgContainer.clientHeight;
+
 // data; not in json file for dev purposes
 let data = {};
 data.foreground = {
@@ -54,11 +59,6 @@ let subLayerTags = [
     "Magnetism",
     "Geophysics",
 ];
-
-// get svgContainer <div> and init svg size
-svgContainer = document.getElementById("svg_container");
-width = svgContainer.clientWidth;
-height = svgContainer.clientHeight;
 
 initData(data.foreground);
 
