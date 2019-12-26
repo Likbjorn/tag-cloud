@@ -39,13 +39,13 @@ let subLayerTags = [
 
 const NUMBER_OF_TAGS = 8;
 
-let width = 1024,
-    height = 480,
+let width,
+    height,
     r = 50,
     interactionRange = 80,
     gaussBlur = 5,
     mouse = {x: 0, y: 0},
-    svg,
+    svg, svgContainer,
     foregroundLayer, middleLayer, backgroundLayer,
     nodes, midNodes, backNodes,
     links, midLinks, backLinks,
@@ -61,13 +61,22 @@ midData = createDummyData(NUMBER_OF_TAGS);
 
 initData(foregroundData);
 
+// get svgContainer <div> and init svg size
+svgContainer = document.getElementById("svg_container");
+width = svgContainer.clientWidth;
+height = svgContainer.clientHeight;
+
 // create svg - probably can be done in index.html
 svg = d3.select("#svg_container")
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
-    .attr("preserveAspectRatio", "xMinYMid meet")
+    .attr("preserveAspectRatio", "none")
     .attr("text-anchor", "middle")
     .classed("svg-content", true);
+
+// add listener for resize
+
+window.addEventListener("resize", onResize);
 
 // create layers
 [backgroundLayer, backNodes, backLinks] = createLayer(
@@ -97,6 +106,8 @@ blur_filter = svg.append("defs")
     .attr("id", "svg_blur")
     .append("feGaussianBlur")
     .attr("stdDeviation", gaussBlur);
+
+// simulation tick functions
 
 function ticked() {
     // foreground layer
@@ -146,6 +157,7 @@ function tickedMid() {
 
 }
 
+// event handlers
 
 function handleBubbleOnMouseClick() {
     // do pretty transition
@@ -190,6 +202,26 @@ function handleSimOnMouseMove() {
 
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
+}
+
+
+function onResize() {
+    //get current svg-container size
+    width = svgContainer.clientWidth;
+    height = svgContainer.clientHeight;
+
+    // resize viewport
+    svg.attr("viewBox", `0 0 ${width} ${height}`)
+    // change sim parameters
+
+    simulationForeground.force("center")
+        .x(width/2)
+        .y(height/2);
+    simulationForeground.force("link")
+        .distance(height/4)
+    simulationMiddle.force("center")
+        .x(width/2)
+        .y(height/2);
 }
 
 
@@ -257,7 +289,7 @@ function initForegroundLayer(data) {
         .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
 
-    simulationForeground.force("link").distance(200).strength(0.5);
+    simulationForeground.force("link").distance(height/4).strength(0.5);
 }
 
 
