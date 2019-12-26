@@ -42,7 +42,6 @@ data.foreground = {
 };
 data.background = createDummyData(NUMBER_OF_TAGS);
 data.middle = createDummyData(NUMBER_OF_TAGS);
-initData(data.foreground);
 
 // placeholder for next layer tags
 let subLayerTags = [
@@ -60,6 +59,8 @@ let subLayerTags = [
 svgContainer = document.getElementById("svg_container");
 width = svgContainer.clientWidth;
 height = svgContainer.clientHeight;
+
+initData(data.foreground);
 
 // create svg - probably can be done in index.html
 svg = d3.select("#svg_container")
@@ -109,6 +110,7 @@ function ticked() {
 
     // find nearest node
     let node = layers.foreground.simulation.find(mouse.x, mouse.y, interactionRange);
+    let prev_node;
 
     if (node) {
         // set node velocity towards cursor
@@ -126,7 +128,7 @@ function ticked() {
             prev_node = node;
         }
         blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
-    } else if (typeof(prev_node) != "undefined") {
+    } else if (prev_node) {
         d3.select("#"+prev_node.title).classed("hovered_circle", false);
     }
 }
