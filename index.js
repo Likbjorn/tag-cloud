@@ -1,11 +1,8 @@
-const NUMBER_OF_TAGS = 8, // default number of middle nodes
-    BACKGROUND = 0, //codes for layers
-    MIDDLE = 1,
-    FOREGROUND = 2;
+const NUMBER_OF_TAGS = 8; // default number of middle nodes
 
 // data; not in json file for dev purposes
-let data = [];
-data[FOREGROUND] = {
+let data = {};
+data["foreground"] = {
     nodes: [
         {title: "Physics", r: 50},
         {title: "Biology", r: 40},
@@ -60,10 +57,10 @@ svgContainer = document.getElementById("svg_container");
 width = svgContainer.clientWidth;
 height = svgContainer.clientHeight;
 
-data[BACKGROUND] = createDummyData(NUMBER_OF_TAGS);
-data[MIDDLE] = createDummyData(NUMBER_OF_TAGS);
+data["background"] = createDummyData(NUMBER_OF_TAGS);
+data["middle"] = createDummyData(NUMBER_OF_TAGS);
 
-initData(data[FOREGROUND]);
+initData(data["foreground"]);
 
 // get svgContainer <div> and init svg size
 svgContainer = document.getElementById("svg_container");
@@ -84,9 +81,9 @@ window.addEventListener("resize", onResize);
 
 // create layers
 layers = [];
-layers[BACKGROUND] = createLayer("background-layer", data[BACKGROUND]);
-layers[MIDDLE] = createLayer("middle-layer", data[MIDDLE]);
-layers[FOREGROUND] = createLayer("foreground-layer", data[FOREGROUND]);
+layers["background"] = createLayer("background-layer", data["background"]);
+layers["middle"] = createLayer("middle-layer", data["middle"]);
+layers["foreground"] = createLayer("foreground-layer", data["foreground"]);
 
 // init data and forces on layers
 initForegroundLayer();
@@ -107,16 +104,16 @@ function ticked() {
     // foreground layer
 
     // move each node according to forces
-    layers[FOREGROUND].nodes.attr("transform", moveNode);
+    layers["foreground"].nodes.attr("transform", moveNode);
 
     // update links
-    layers[FOREGROUND].links.attr("x1", d => d.source.x)
+    layers["foreground"].links.attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    let node = layers[FOREGROUND].simulation.find(mouse.x, mouse.y, interactionRange);
+    let node = layers["foreground"].simulation.find(mouse.x, mouse.y, interactionRange);
 
     if (node) {
         // set node velocity towards cursor
@@ -141,10 +138,10 @@ function ticked() {
 
 
 function tickedMid() {
-    layers[1].nodes.attr("transform", moveNode);
+    layers["middle"].nodes.attr("transform", moveNode);
 
     // update links
-    layers[1].links.attr("x1", d => d.source.x)
+    layers["middle"].links.attr("x1", d => d.source.x)
         .attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
@@ -155,12 +152,12 @@ function tickedMid() {
 
 function onNodeClick() {
     // do pretty transition
-    layers[FOREGROUND].group
+    layers["foreground"].group
         .selectAll("text") // text does not inherit opacity for some reason
         .transition()
         .duration(500)
         .attr("opacity", 0);
-    layers[FOREGROUND].group
+    layers["foreground"].group
         .transition()
         .duration(500)
         .attr("fill-opacity", 0)
@@ -168,23 +165,23 @@ function onNodeClick() {
         .remove();
 
     // promote middle layer
-    layers[FOREGROUND].group = layers[MIDDLE].group.classed("middle-layer", false)
+    layers["foreground"].group = layers["middle"].group.classed("middle-layer", false)
         .classed("foreground-layer", true);
-    layers[FOREGROUND].data = layers[MIDDLE].data;
-    layers[FOREGROUND].nodes = layers[MIDDLE].nodes;
-    layers[FOREGROUND].links = layers[MIDDLE].links;
+    layers["foreground"].data = layers["middle"].data;
+    layers["foreground"].nodes = layers["middle"].nodes;
+    layers["foreground"].links = layers["middle"].links;
 
     // TODO: Add children data request and fill "title" attribute in data
-    layers[FOREGROUND].data.nodes.forEach(function(node, i) {
+    layers["foreground"].data.nodes.forEach(function(node, i) {
         node.title = subLayerTags[i];
     });
 
     // create new middle layer
-    layers[MIDDLE] = createLayer(
+    layers["middle"] = createLayer(
         "middle-layer",
         createDummyData(NUMBER_OF_TAGS),
         afterCSS="background-layer");
-    layers[MIDDLE].nodes.attr("transform", moveNode);
+    layers["middle"].nodes.attr("transform", moveNode);
 
     // init layers
     initForegroundLayer();
@@ -209,12 +206,12 @@ function onResize() {
     svg.attr("viewBox", `0 0 ${width} ${height}`)
     // change sim parameters
 
-    layers[FOREGROUND].simulation.force("center")
+    layers["foreground"].simulation.force("center")
         .x(width/2)
         .y(height/2);
-    layers[FOREGROUND].simulation.force("link")
+    layers["foreground"].simulation.force("link")
         .distance(height*linkLength)
-    layers[MIDDLE].simulation.force("center")
+    layers["middle"].simulation.force("center")
         .x(width/2)
         .y(height/2);
 
@@ -239,7 +236,7 @@ function dragged(d) {
 
 
 function dragEnded(d) {
-    if (!d3.event.active) layers[FOREGROUND].simulation.alphaTarget(0);
+    if (!d3.event.active) layers["foreground"].simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
 }
@@ -260,8 +257,8 @@ function moveNode(d) {
 
 function initForegroundLayer() {
     // and create a text label on it basing on title in data.nodes
-    let data = layers[FOREGROUND].data;
-    let nodes = layers[FOREGROUND].nodes;
+    let data = layers["foreground"].data;
+    let nodes = layers["foreground"].nodes;
 
     nodes.attr("title", d => d.title);
     nodes.select("circle").attr("id", d => d.title);
@@ -281,15 +278,15 @@ function initForegroundLayer() {
     nodes.selectAll("circle")
         .on("click", onNodeClick);
 
-    // add force layers[FOREGROUND].simulation
-    layers[FOREGROUND].simulation = d3.forceSimulation(data.nodes)
+    // add force layers["foreground"].simulation
+    layers["foreground"].simulation = d3.forceSimulation(data.nodes)
         .force("charge", d3.forceManyBody().strength(-100))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
 
-    layers[FOREGROUND].simulation
+    layers["foreground"].simulation
         .force("link")
         .distance(height*linkLength)
         .strength(0.5);
@@ -297,16 +294,16 @@ function initForegroundLayer() {
 
 
 function initMidLayer() {
-    let data = layers[MIDDLE].data;
-    let nodes = layers[MIDDLE].nodes;
+    let data = layers["middle"].data;
+    let nodes = layers["middle"].nodes;
 
-    layers[MIDDLE].simulation = d3.forceSimulation(data.nodes)
+    layers["middle"].simulation = d3.forceSimulation(data.nodes)
         .force("charge", d3.forceManyBody().strength(-100))
         .force("collide", d3.forceCollide(r).strength(0.5))
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .on("tick", tickedMid);
-    layers[MIDDLE].simulation.force("link").distance(height*linkLength).strength(0.5);
+    layers["middle"].simulation.force("link").distance(height*linkLength).strength(0.5);
 }
 
 
@@ -410,6 +407,6 @@ function initData(data) {
 
 function restartSimulations() {
     //simulationBack.alphaTarget(0.3).restart();
-    layers[MIDDLE].simulation.alphaTarget(0.3).restart();
-    layers[FOREGROUND].simulation.alphaTarget(0.3).restart();
+    layers["middle"].simulation.alphaTarget(0.3).restart();
+    layers["foreground"].simulation.alphaTarget(0.3).restart();
 }
