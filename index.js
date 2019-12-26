@@ -53,6 +53,11 @@ let width,
     blur_filter,
     blur_ratio;
 
+// get svgContainer <div> and init svg size
+svgContainer = document.getElementById("svg_container");
+width = svgContainer.clientWidth;
+height = svgContainer.clientHeight;
+
 const backgroundData = createDummyData(NUMBER_OF_TAGS);
 
 let midData;
@@ -98,7 +103,7 @@ window.addEventListener("resize", onResize);
 initForegroundLayer(foregroundData);
 initMidLayer(midData);
 
-svg.on("mousemove", handleSimOnMouseMove);
+svg.on("mousemove", onMouseMove);
 
 // add a blur filter
 blur_filter = svg.append("defs")
@@ -159,7 +164,7 @@ function tickedMid() {
 
 // event handlers
 
-function handleBubbleOnMouseClick() {
+function onNodeClick() {
     // do pretty transition
     foregroundLayer.selectAll("text") // text does not inherit opacity for some reason
         .transition()
@@ -197,8 +202,6 @@ function handleBubbleOnMouseClick() {
 }
 
 
-function handleSimOnMouseMove() {
-    if (!d3.event.active) simulationForeground.alphaTarget(0.3).restart();
 
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
@@ -226,7 +229,6 @@ function onResize() {
 
 
 function dragStarted (d) {
-    if (!d3.event.active) simulationForeground.alphaTarget(0.3).restart();
     d.fx = d.x;
     d.fy = d.y;
 }
@@ -279,7 +281,7 @@ function initForegroundLayer(data) {
 
     // handle user interaction
     nodes.selectAll("circle")
-        .on("click", handleBubbleOnMouseClick);
+        .on("click", onNodeClick);
 
     // add force simulationForeground
     simulationForeground = d3.forceSimulation(data.nodes)
