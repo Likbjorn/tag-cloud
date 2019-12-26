@@ -3,6 +3,10 @@ const NUMBER_OF_TAGS = 8; // default number of middle nodes
 let r = 50, // px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
+    attractionRate = 0.05, // how fast nodes are attracted to cursor
+    charge = -0.1,
+    exitDuration = 1000,
+    enterDuration = 100,
     gaussBlur = 5,
     mouse = {x: 0, y: 0},
     width,
@@ -114,8 +118,8 @@ function ticked() {
 
     if (node) {
         // set node velocity towards cursor
-        node.vx = (mouse.x - node.x)*0.05;
-        node.vy = (mouse.y - node.y)*0.05;
+        node.vx = (mouse.x - node.x)*attractionRate;
+        node.vy = (mouse.y - node.y)*attractionRate;
 
         mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
         blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
@@ -153,11 +157,11 @@ function onNodeClick() {
     layers.foreground.group
         .selectAll("text") // text does not inherit opacity for some reason
         .transition()
-        .duration(500)
+        .duration(exitDuration)
         .attr("opacity", 0);
     layers.foreground.group
         .transition()
-        .duration(500)
+        .duration(exitDuration)
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 0)
         .remove();
@@ -201,19 +205,19 @@ function onResize() {
     height = svgContainer.clientHeight;
 
     // resize viewport
-    svg.attr("viewBox", `0 0 ${width} ${height}`)
+    svg.attr("viewBox", `0 0 ${width} ${height}`);
     // change sim parameters
 
     layers.foreground.simulation.force("center")
         .x(width/2)
         .y(height/2);
     layers.foreground.simulation.force("link")
-        .distance(height*linkLength)
+        .distance(height*linkLength);
     layers.middle.simulation.force("center")
         .x(width/2)
         .y(height/2);
     layers.foreground.simulation.force("link")
-        .distance(height*linkLength)
+        .distance(height*linkLength);
 
     restartSimulations();
 }
@@ -281,7 +285,7 @@ function initForegroundLayer() {
 
     // add force layers.foreground.simulation
     layers.foreground.simulation = d3.forceSimulation(data.nodes)
-        .force("charge", d3.forceManyBody().strength(-100))
+        .force("charge", d3.forceManyBody().strength(charge*height))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .force("collide", d3.forceCollide(r).strength(0.5))
@@ -299,12 +303,15 @@ function initMidLayer() {
     let nodes = layers.middle.nodes;
 
     layers.middle.simulation = d3.forceSimulation(data.nodes)
-        .force("charge", d3.forceManyBody().strength(-100))
+        .force("charge", d3.forceManyBody().strength(charge*height))
         .force("collide", d3.forceCollide(r).strength(0.5))
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .on("tick", tickedMid);
-    layers.middle.simulation.force("link").distance(height*linkLength).strength(0.5);
+    layers.middle.simulation
+        .force("link")
+        .distance(height*linkLength)
+        .strength(0.5);
 }
 
 
@@ -340,7 +347,7 @@ function createLayer(layerCSS, data, afterCSS=null) {
 
     // append basic circle to each node
     nodes.append("circle")
-        .transition().duration(100)
+        .transition().duration(enterDuration)
         .attr("r", d => d.r ? d.r : r) //if nodes.r provided use it, else default
         .attr("class", "tag_circles");
 
