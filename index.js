@@ -121,6 +121,9 @@ function ticked() {
     // move each node according to forces
     layers.foreground.nodes.attr("transform", moveNode);
 
+    layers.foreground.nodes.select("#coords")
+        .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
+
     // update links
     layers.foreground.links
         .attr("x1", d => d.source.x)
@@ -207,8 +210,6 @@ function onNodeClick() {
 
 
 function onMouseMove() {
-    if (!d3.event.active) restartSimulations();
-
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
 }
@@ -228,10 +229,11 @@ function onResize() {
         .y(height/2);
     layers.foreground.simulation.force("link")
         .distance(height*linkLength);
+
     layers.middle.simulation.force("center")
         .x(width/2)
         .y(height/2);
-    layers.foreground.simulation.force("link")
+    layers.middle.simulation.force("link")
         .distance(height*linkLength);
 
     restartSimulations();
@@ -246,16 +248,17 @@ function dragStarted (d) {
 
 
 function dragged(d) {
+    if (!d3.event.active) restartSimulations();
     mouse.x = d3.event.x;
     mouse.y = d3.event.y;
 
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
+    d.fx = mouse.x;
+    d.fy = mouse.y;
 }
 
 
 function dragEnded(d) {
-    if (!d3.event.active) layers.foreground.simulation.alphaTarget(0);
+    if (!d3.event.active) restartSimulations();
     d.fx = null;
     d.fy = null;
 }
@@ -285,6 +288,11 @@ function initForegroundLayer() {
 
     nodes.append("text")
         .text(d => d.title);
+
+    nodes.append("text")
+        .attr("id", "coords")
+        .attr("dy", 20)
+        .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
 
     // add drag functionality
     nodes.call(
