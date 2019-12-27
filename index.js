@@ -213,10 +213,11 @@ function onResize() {
         .y(height/2);
     layers.foreground.simulation.force("link")
         .distance(height*linkLength);
+
     layers.middle.simulation.force("center")
         .x(width/2)
         .y(height/2);
-    layers.foreground.simulation.force("link")
+    layers.middle.simulation.force("link")
         .distance(height*linkLength);
 
     restartSimulations();
