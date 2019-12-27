@@ -6,6 +6,7 @@ let r = 10, // px
     interactionRange = 80, // px
     attractionRate = 0.05, // how fast nodes are attracted to cursor
     charge = -0.1,
+    chargeDistance = 100, // max node to node interaction distance, px
     exitDuration = 1000,
     enterDuration = 100,
     gaussBlur = 1.5,
@@ -308,17 +309,22 @@ function initForegroundLayer() {
         .on("click", onNodeClick);
 
     // add force layers.foreground.simulation
-    layers.foreground.simulation = d3.forceSimulation(data.nodes)
-        .force("charge", d3.forceManyBody().strength(charge*height))
+    let simulation = d3.forceSimulation(data.nodes)
+        .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
-        .force("collide", d3.forceCollide(r).strength(0.5))
         .on("tick", ticked);
 
-    layers.foreground.simulation
+    simulation
         .force("link")
         .distance(height*linkLength)
         .strength(0.5);
+    simulation
+        .force("charge")
+        .strength(charge*height)
+        .distanceMax(chargeDistance);
+
+    layers.foreground.simulation = simulation;
 }
 
 
@@ -326,16 +332,21 @@ function initMidLayer() {
     let data = layers.middle.data;
     let nodes = layers.middle.nodes;
 
-    layers.middle.simulation = d3.forceSimulation(data.nodes)
+    let simulation = d3.forceSimulation(data.nodes)
         .force("charge", d3.forceManyBody().strength(charge*height))
-        .force("collide", d3.forceCollide(r).strength(0.5))
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .on("tick", tickedMid);
-    layers.middle.simulation
+    simulation
         .force("link")
         .distance(height*linkLength)
         .strength(0.5);
+    simulation
+        .force("charge")
+        .strength(charge*height)
+        .distanceMax(chargeDistance);
+
+    layers.middle.simulation = simulation;
 }
 
 
