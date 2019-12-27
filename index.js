@@ -11,6 +11,8 @@ let r = 10, // px
     enterDuration = 100,
     gaussBlur = 1.5,
     mouse = {x: 0, y: 0},
+    alphaTarget = 0.1, // simulation parameters
+    alphaInitial = 1,
     width,
     height,
     svg, svgContainer,
@@ -154,6 +156,7 @@ function ticked() {
         blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
     } else if (prev_node) {
         d3.select("#"+prev_node.id).classed("hovered_circle", false);
+        restartSimulations(); // otherwise everything stops instantly when simulation runs for some time
     }
 }
 
@@ -212,6 +215,8 @@ function onNodeClick() {
 
 
 function onMouseMove() {
+    restartSimulations();
+
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
 }
@@ -313,6 +318,7 @@ function initForegroundLayer() {
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
+        .alpha(alphaInitial)
         .on("tick", ticked);
 
     simulation
@@ -336,6 +342,7 @@ function initMidLayer() {
         .force("charge", d3.forceManyBody().strength(charge*height))
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
+        .alpha(alphaInitial)
         .on("tick", tickedMid);
     simulation
         .force("link")
@@ -450,6 +457,6 @@ function initData(data) {
 
 
 function restartSimulations() {
-    layers.middle.simulation.alphaTarget(0.3).restart();
-    layers.foreground.simulation.alphaTarget(0.3).restart();
+    layers.middle.simulation.alphaTarget(alphaTarget).restart();
+    layers.foreground.simulation.alphaTarget(alphaTarget).restart();
 }
