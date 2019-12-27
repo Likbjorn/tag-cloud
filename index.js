@@ -14,7 +14,8 @@ let r = 50, // px
     svg, svgContainer,
     layers,
     prev_node,
-    blur_filter,
+    blur_filter_svg,
+    blur_filter_mid,
     blur_ratio;
 
 // get svgContainer <div> and init svg size
@@ -106,12 +107,19 @@ initMidLayer();
 
 svg.on("mousemove", onMouseMove);
 
-// add a blur filter
-blur_filter = svg.append("defs")
+// add a blur filter for circles
+blur_filter_svg = svg.append("defs")
     .append("filter")
     .attr("id", "svg_blur")
     .append("feGaussianBlur")
     .attr("stdDeviation", gaussBlur);
+
+// add a blur filter for middle layer
+blur_filter_mid = svg.append("defs")
+    .append("filter")
+    .attr("id", "mid_blur")
+    .append("feGaussianBlur")
+    .attr("stdDeviation", 10);
 
 // simulation tick functions
 
@@ -149,7 +157,7 @@ function ticked() {
             d3.select("#"+node.id).classed("hovered_circle", true);
             prev_node = node;
         }
-        blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
+        blur_filter_svg.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
     } else if (prev_node) {
         d3.select("#"+prev_node.id).classed("hovered_circle", false);
     }
@@ -287,7 +295,9 @@ function initForegroundLayer() {
     nodes.select("circle").attr("id", d => d.id);
 
     nodes.append("text")
-        .text(d => d.title);
+        .text(d => d.title)
+        .attr("x", 30)
+        .attr("y", -15);
 
     nodes.append("text")
         .attr("id", "coords")

@@ -35,7 +35,7 @@ body {
 
 .link {
     stroke: #a5a5a5; /* grey */
-    stroke-width: 4px;
+    stroke-width: 1px;
 }
 
 .background-layer {
@@ -46,8 +46,8 @@ body {
 
 .middle-layer {
     fill: #808080;
-    fill-opacity: 50%;
-    stroke-opacity: 20%;
+    opacity: 50%;
+    filter: url(#mid_blur);
 }
 
 .foreground-layer {
@@ -55,12 +55,14 @@ body {
 }
 
 g.foreground-layer > g > text { /* text on tag bubbles */
-    fill: #000000;
+    fill: #3ac7f5;
     font-size: 12pt;
     font-family: "Arial";
     opacity: 100%;
     pointer-events: none;
     transition: all 500ms ease-out;
+    text-shadow: 1px 1px 2px #2c3be8;
+    user-select: none;
 }
 
 g.foreground-layer > g > text#coords { /* debug coordinates on text bubbles */
