@@ -298,11 +298,14 @@ function initForegroundLayer() {
         .text(d => d.title)
         .attr("x", 30)
         .attr("y", -15);
+<<<<<<< HEAD
 
     nodes.append("text")
         .attr("id", "coords")
         .attr("dy", 20)
         .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
+=======
+>>>>>>> 5022007f95622577d91b77588d525c63d75ce672
 
     // add drag functionality
     nodes.call(

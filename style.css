@@ -63,6 +63,7 @@ g.foreground-layer > g > text { /* text on tag bubbles */
     transition: all 500ms ease-out;
     text-shadow: 1px 1px 2px #2c3be8;
     user-select: none;
+<<<<<<< HEAD
 }
 
 g.foreground-layer > g > text#coords { /* debug coordinates on text bubbles */
@@ -72,4 +73,6 @@ g.foreground-layer > g > text#coords { /* debug coordinates on text bubbles */
     opacity: 100%;
     pointer-events: none;
     transition: all 500ms ease-out;
+=======
+>>>>>>> 5022007f95622577d91b77588d525c63d75ce672
 }
