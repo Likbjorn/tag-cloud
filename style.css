@@ -62,3 +62,12 @@ g.foreground-layer > g > text { /* text on tag bubbles */
     pointer-events: none;
     transition: all 500ms ease-out;
 }
+
+g.foreground-layer > g > text#coords { /* debug coordinates on text bubbles */
+    fill: #808080;
+    font-size: 9pt;
+    font-family: "Arial";
+    opacity: 100%;
+    pointer-events: none;
+    transition: all 500ms ease-out;
+}
