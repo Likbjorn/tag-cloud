@@ -1,6 +1,7 @@
 const NUMBER_OF_TAGS = 8; // default number of middle nodes
 
-let r = 50, // px
+let r = 10, // px
+    dr = 10, // max increment to random radius, px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
     attractionRate = 0.05, // how fast nodes are attracted to cursor
@@ -389,7 +390,7 @@ function createDummyData(n=NUMBER_OF_TAGS) {
     for (let i = 0; i < n; i++) {
         let x = getRandomInt(0, width),
             y = getRandomInt(0, height),
-            rad = getRandomInt(r, r+20);
+            rad = getRandomInt(r, r+dr);
         data.nodes.push({
             x: x,
             y: y,
