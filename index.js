@@ -7,7 +7,7 @@ let r = 50, // px
     charge = -0.1,
     exitDuration = 1000,
     enterDuration = 100,
-    gaussBlur = 5,
+    gaussBlur = 1.5,
     mouse = {x: 0, y: 0},
     width,
     height,
@@ -26,15 +26,19 @@ height = svgContainer.clientHeight;
 let data = {};
 data.foreground = {
     nodes: [
-        {title: "Physics", r: 50},
-        {title: "Biology", r: 40},
-        {title: "Math", r: 60},
-        {title: "Medicine", r: 45},
-        {title: "Economy", r: 45},
-        {title: "Statistics", r: 55},
-        {title: "Chemistry", r: 50},
-        {title: "History", r: 40},
-        {title: "Literature", r: 55},
+        {title: "Physics", r: 10},
+        {title: "Biology", r: 8},
+        {title: "Math", r: 12},
+        {title: "Medicine", r: 9},
+        {title: "Economy", r: 9},
+        {title: "Statistics", r: 11},
+        {title: "Chemistry", r: 10},
+        {title: "History", r: 8},
+        {title: "Literature", r: 11},
+        {title: "Sombrero", r: 14},
+        {title: "Space travels", r: 6},
+        {title: "Lights deflect", r: 15},
+        {title: "Deebs", r: 12},
     ],
     links: [
         {source: "Physics", target: "Math"},
@@ -48,6 +52,11 @@ data.foreground = {
         {source: "Chemistry", target: "Physics"},
         {source: "History", target: "Literature"},
         {source: "History", target: "Economy"},
+        {source: "Space travels", target: "Physics"},
+        {source: "Sombrero", target: "Lights deflect"},
+        {source: "Lights deflect", target: "Deebs"},
+        {source: "Sombrero", target: "Deebs"}
+
     ]
 };
 data.background = createDummyData(NUMBER_OF_TAGS);
@@ -63,7 +72,13 @@ let subLayerTags = [
     "Optics",
     "Magnetism",
     "Geophysics",
+    "Sombrero",
+    "Space travels",
+    "Lights deflect",
+    "Deebs",
 ];
+
+data.foreground.nodes.forEach( i => i.id = i.title.replace(/ /g, ""));
 
 initData(data.foreground);
 
@@ -125,15 +140,15 @@ function ticked() {
         blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
 
         // blur it
-        if (d3.select("g.foreground-layer#"+node.title) != d3.select("g.foreground-layer > g > .hovered_circle")) {
+        if (d3.select("g.foreground-layer#"+node.id) != d3.select("g.foreground-layer > g > .hovered_circle")) {
             d3.select("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
             //blur_ratio = gaussBlur;
-            d3.select("#"+node.title).classed("hovered_circle", true);
+            d3.select("#"+node.id).classed("hovered_circle", true);
             prev_node = node;
         }
         blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
     } else if (prev_node) {
-        d3.select("#"+prev_node.title).classed("hovered_circle", false);
+        d3.select("#"+prev_node.id).classed("hovered_circle", false);
     }
 }
 
@@ -266,7 +281,7 @@ function initForegroundLayer() {
     let nodes = layers.foreground.nodes;
 
     nodes.attr("title", d => d.title);
-    nodes.select("circle").attr("id", d => d.title);
+    nodes.select("circle").attr("id", d => d.id);
 
     nodes.append("text")
         .text(d => d.title);
