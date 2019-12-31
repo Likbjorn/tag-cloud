@@ -8,6 +8,7 @@ let r = 10, // px
     velocityDecay = 0.1,
     charge = -0.1,
     chargeDistance = 100, // max node to node interaction distance, px
+    linkStrength = 0.2,
     exitDuration = 1000,
     enterDuration = 100,
     gaussBlur = 1.5,
@@ -323,7 +324,7 @@ function initForegroundLayer() {
     simulation
         .force("link")
         .distance(height*linkLength)
-        .strength(0.5);
+        .strength(linkStrength);
     simulation
         .force("charge")
         .strength(charge*height)
@@ -348,7 +349,7 @@ function initMidLayer() {
     simulation
         .force("link")
         .distance(height*linkLength)
-        .strength(0.5);
+        .strength(linkStrength);
     simulation
         .force("charge")
         .strength(charge*height)
