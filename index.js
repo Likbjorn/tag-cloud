@@ -12,8 +12,9 @@ let r = 10, // px
     enterDuration = 100,
     gaussBlur = 1.5,
     mouse = {x: 0, y: 0},
-    alphaTarget = 0.5, // simulation parameters
-    alphaInitial = 0.5,
+    alphaTarget = 0.2, // simulation parameters
+    alphaInitial = 0.2,
+    alphaDecay = 0, // let simulation never end
     width,
     height,
     svg, svgContainer,
@@ -219,8 +220,6 @@ function onNodeClick() {
 
 
 function onMouseMove() {
-    restartSimulations();
-
     mouse.x = d3.mouse(this)[0];
     mouse.y = d3.mouse(this)[1];
 }
@@ -233,8 +232,8 @@ function onResize() {
 
     // resize viewport
     svg.attr("viewBox", `0 0 ${width} ${height}`);
-    // change sim parameters
 
+    // change sim parameters
     layers.foreground.simulation.force("center")
         .x(width / 2)
         .y(height / 2);
@@ -250,14 +249,12 @@ function onResize() {
 
 
 function dragStarted (d) {
-    //if (!d3.event.active) restartSimulations();
     d.fx = d.x;
     d.fy = d.y;
 }
 
 
 function dragged(d) {
-    //if (!d3.event.active) restartSimulations();
     mouse.x = d3.event.x;
     mouse.y = d3.event.y;
 
@@ -267,7 +264,6 @@ function dragged(d) {
 
 
 function dragEnded(d) {
-    //if (!d3.event.active) restartSimulations();
     d.fx = null;
     d.fy = null;
 }
@@ -321,6 +317,7 @@ function initForegroundLayer() {
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .alpha(alphaInitial)
+        .alphaDecay(alphaDecay)
         .velocityDecay(velocityDecay)
         .on("tick", ticked);
     simulation
@@ -345,6 +342,7 @@ function initMidLayer() {
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .alpha(alphaInitial)
+        .alphaDecay(alphaDecay)
         .velocityDecay(velocityDecay)
         .on("tick", tickedMid);
     simulation
