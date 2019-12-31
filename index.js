@@ -4,7 +4,7 @@ let r = 10, // px
     dr = 10, // max increment to random radius, px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
-    attractionRate = 0.05, // how fast nodes are attracted to cursor
+    attractionRate = 0.01, // how fast nodes are attracted to cursor
     charge = -0.1,
     chargeDistance = 100, // max node to node interaction distance, px
     exitDuration = 1000,
@@ -125,6 +125,7 @@ function ticked() {
     // move each node according to forces
     layers.foreground.nodes.attr("transform", moveNode);
 
+    // debug coords
     layers.foreground.nodes.select("#coords")
         .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
 
@@ -140,8 +141,7 @@ function ticked() {
 
     if (node) {
         // set node velocity towards cursor
-        node.vx = (mouse.x - node.x)*attractionRate;
-        node.vy = (mouse.y - node.y)*attractionRate;
+        moveToCursor(node, attractionRate);
 
         mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
         blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
@@ -156,7 +156,7 @@ function ticked() {
         blur_filter.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
     } else if (prev_node) {
         d3.select("#"+prev_node.id).classed("hovered_circle", false);
-        restartSimulations(); // otherwise everything stops instantly when simulation runs for some time
+        //restartSimulations(); // otherwise everything stops instantly when simulation runs for some time
     }
 }
 
@@ -171,6 +171,15 @@ function tickedMid() {
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
 
+    // find nearest node
+    let node = layers.middle.simulation.find(mouse.x, mouse.y, interactionRange);
+
+    if (node) {
+        // set node velocity towards cursor
+        moveToCursor(node, -attractionRate);
+    } else {
+        //restartSimulations(); // otherwise everything stops instantly when simulation runs for some time
+    }
 }
 
 // event handlers
@@ -320,7 +329,6 @@ function initForegroundLayer() {
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .alpha(alphaInitial)
         .on("tick", ticked);
-
     simulation
         .force("link")
         .distance(height*linkLength)
@@ -459,4 +467,10 @@ function initData(data) {
 function restartSimulations() {
     layers.middle.simulation.alphaTarget(alphaTarget).restart();
     layers.foreground.simulation.alphaTarget(alphaTarget).restart();
+}
+
+
+function moveToCursor(node, attractionRate) {
+    node.vx += attractionRate*(mouse.x - node.x);
+    node.vy += attractionRate*(mouse.y - node.y);
 }
