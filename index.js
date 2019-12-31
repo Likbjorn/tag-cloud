@@ -317,10 +317,7 @@ function initForegroundLayer() {
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .alpha(alphaInitial)
-<<<<<<< HEAD
         .alphaDecay(alphaDecay)
-=======
->>>>>>> 072c3e3d2a6ea780e7e8d192927212be572d4d90
         .velocityDecay(velocityDecay)
         .on("tick", ticked);
     simulation
@@ -345,10 +342,7 @@ function initMidLayer() {
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .alpha(alphaInitial)
-<<<<<<< HEAD
         .alphaDecay(alphaDecay)
-=======
->>>>>>> 072c3e3d2a6ea780e7e8d192927212be572d4d90
         .velocityDecay(velocityDecay)
         .on("tick", tickedMid);
     simulation
