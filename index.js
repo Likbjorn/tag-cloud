@@ -182,7 +182,7 @@ function tickedMid() {
 
 // event handlers
 
-function onNodeClick() {
+function onNodeClick(node) {
     // do pretty transition
     layers.foreground.group
         .selectAll("text") // text does not inherit opacity for some reason
@@ -197,15 +197,11 @@ function onNodeClick() {
         .remove();
 
     // promote middle layer
+    layers.foreground = layers.middle;
     layers.foreground.group = layers.middle.group.classed("middle-layer", false)
         .classed("foreground-layer", true);
-    layers.foreground = layers.middle;
 
-    // TODO: Add children data request and fill "title" attribute in data
-    layers.foreground.data.nodes.forEach(function(node, i) {
-        node.title = subLayerTags[i];
-    });
-    initData(layers.foreground.data); // update IDs basing on titles
+    requestData(node); // request new data basing on clicked node
 
     // create new middle layer
     layers.middle = createLayer(
@@ -401,6 +397,17 @@ function createLayer(layerCSS, data, afterCSS=null) {
         links: links,
         data: data,
     };
+}
+
+
+function requestData(node) {
+    // placeholder
+    console.log("Requesting child tags of " + node.title);
+    // TODO: Add children data request and fill "title" attribute in data
+    layers.foreground.data.nodes.forEach(function(node, i) {
+        node.title = subLayerTags[i];
+    });
+    initData(layers.foreground.data); // update IDs basing on titles
 }
 
 
