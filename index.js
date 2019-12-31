@@ -83,8 +83,6 @@ let subLayerTags = [
     "Deebs",
 ];
 
-data.foreground.nodes.forEach( i => i.id = i.title.replace(/ /g, ""));
-
 initData(data.foreground);
 
 // create svg - probably can be done in index.html
@@ -205,6 +203,7 @@ function onNodeClick() {
     layers.foreground.data.nodes.forEach(function(node, i) {
         node.title = subLayerTags[i];
     });
+    initData(layers.foreground.data); // update IDs basing on titles
 
     // create new middle layer
     layers.middle = createLayer(
@@ -410,15 +409,9 @@ function createDummyData(n=NUMBER_OF_TAGS) {
     // create data with random node coordinates
     let data = {nodes: [], links: []};
     for (let i = 0; i < n; i++) {
-        let x = getRandomInt(0, width),
-            y = getRandomInt(0, height),
-            rad = getRandomInt(r, r+dr);
-        data.nodes.push({
-            x: x,
-            y: y,
-            r: rad
-        });
+        data.nodes.push({title: "placeholder"+i});
     }
+    initData(data);
 
     createDummyLinks(data);
 
@@ -452,9 +445,10 @@ function getRandomInt(min, max) {
 function initData(data) {
     // add missing properties if any
     data.nodes.forEach(function(node) {
-        node.x = node.x ? node.x : width/2;
-        node.y = node.y ? node.y : height/2;
-        node.r = node.r ? node.r : r;
+        node.x = node.x ? node.x : getRandomInt(0, width);
+        node.y = node.y ? node.y : getRandomInt(0, height);
+        node.r = node.r ? node.r : getRandomInt(r, r+dr);
+        node.id = node.title ? node.title.replace(/ /g, "") : null;
     });
     return data;
 }
