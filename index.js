@@ -5,6 +5,7 @@ let r = 10, // px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
     attractionRate = 0.01, // how fast nodes are attracted to cursor
+    velocityDecay = 0.1,
     charge = -0.1,
     chargeDistance = 100, // max node to node interaction distance, px
     exitDuration = 1000,
@@ -328,6 +329,7 @@ function initForegroundLayer() {
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .alpha(alphaInitial)
+        .velocityDecay(velocityDecay)
         .on("tick", ticked);
     simulation
         .force("link")
@@ -351,6 +353,7 @@ function initMidLayer() {
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
         .alpha(alphaInitial)
+        .velocityDecay(velocityDecay)
         .on("tick", tickedMid);
     simulation
         .force("link")
