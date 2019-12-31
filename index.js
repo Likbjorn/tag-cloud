@@ -12,8 +12,8 @@ let r = 10, // px
     enterDuration = 100,
     gaussBlur = 1.5,
     mouse = {x: 0, y: 0},
-    alphaTarget = 0.1, // simulation parameters
-    alphaInitial = 1,
+    alphaTarget = 0.5, // simulation parameters
+    alphaInitial = 0.5,
     width,
     height,
     svg, svgContainer,
@@ -199,9 +199,7 @@ function onNodeClick() {
     // promote middle layer
     layers.foreground.group = layers.middle.group.classed("middle-layer", false)
         .classed("foreground-layer", true);
-    layers.foreground.data = layers.middle.data;
-    layers.foreground.nodes = layers.middle.nodes;
-    layers.foreground.links = layers.middle.links;
+    layers.foreground = layers.middle;
 
     // TODO: Add children data request and fill "title" attribute in data
     layers.foreground.data.nodes.forEach(function(node, i) {
@@ -239,30 +237,28 @@ function onResize() {
     // change sim parameters
 
     layers.foreground.simulation.force("center")
-        .x(width/2)
-        .y(height/2);
+        .x(width / 2)
+        .y(height / 2);
     layers.foreground.simulation.force("link")
         .distance(height*linkLength);
 
     layers.middle.simulation.force("center")
-        .x(width/2)
-        .y(height/2);
+        .x(width / 2)
+        .y(height / 2);
     layers.middle.simulation.force("link")
         .distance(height*linkLength);
-
-    restartSimulations();
 }
 
 
 function dragStarted (d) {
-    if (!d3.event.active) restartSimulations();
+    //if (!d3.event.active) restartSimulations();
     d.fx = d.x;
     d.fy = d.y;
 }
 
 
 function dragged(d) {
-    if (!d3.event.active) restartSimulations();
+    //if (!d3.event.active) restartSimulations();
     mouse.x = d3.event.x;
     mouse.y = d3.event.y;
 
@@ -272,7 +268,7 @@ function dragged(d) {
 
 
 function dragEnded(d) {
-    if (!d3.event.active) restartSimulations();
+    //if (!d3.event.active) restartSimulations();
     d.fx = null;
     d.fy = null;
 }
