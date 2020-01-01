@@ -20,7 +20,7 @@ let r = 10, // px
     height,
     svg, svgContainer,
     layers,
-    prev_node,
+    nearestNodes,
     blur_filter_svg,
     blur_filter_mid,
     blur_ratio;
@@ -139,6 +139,9 @@ function ticked() {
     layers.foreground.nodes.select("#coords")
         .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
 
+    // remove highlight from all nodes
+    d3.select("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
+
     // update links
     layers.foreground.links
         .attr("x1", d => d.source.x)
@@ -147,28 +150,21 @@ function ticked() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    let nearestNodes = findAll(mouse.x, mouse.y, interactionRange, layers.foreground.simulation, 3);
+    nearestNodes = findAll(mouse.x, mouse.y, interactionRange, layers.foreground.simulation, 3);
+
 
     if (nearestNodes) {
         nearestNodes.forEach(function(node){
-          // set node velocity towards cursor
-          moveToCursor(node, attractionRate);
+            // set node velocity towards cursor
+            moveToCursor(node, attractionRate);
+            d3.select("#"+node.id).classed("hovered_circle", true);
 
-          mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
-          blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
+            mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
+            blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
 
-          // blur it
-          if (d3.select("g.foreground-layer#"+node.id) != d3.select("g.foreground-layer > g > .hovered_circle")) {
-              d3.select("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
-              //blur_ratio = gaussBlur;
-              d3.select("#"+node.id).classed("hovered_circle", true);
-              prev_node = node;
-          }
-          blur_filter_svg.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
-      });
-
-    } else if (prev_node) {
-        d3.select("#"+prev_node.id).classed("hovered_circle", false);
+            // blur it
+            blur_filter_svg.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
+        });
     }
 }
 
