@@ -210,7 +210,7 @@ function ticked() {
               prev_node = node;
           }
           blur_filter_svg.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
-        })
+      });
 
     } else if (prev_node) {
         d3.select("#"+prev_node.id).classed("hovered_circle", false);
