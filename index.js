@@ -31,53 +31,53 @@ width = svgContainer.clientWidth;
 height = svgContainer.clientHeight;
 
 findAll = function(x, y, radius, simulation, quantity = 0) {
-  nodes = simulation.nodes();
-  let i = 0,
-      n = nodes.length,
-      dx,
-      dy,
-      d2,
-      node,
-      closest,
-      innerRadius;
+    nodes = simulation.nodes();
+    let i = 0,
+        n = nodes.length,
+        dx,
+        dy,
+        d2,
+        node,
+        closest,
+        innerRadius;
 
-	if (n < quantity) return nodes.concat();
-  if (quantity) closest = [];
+    if (n < quantity) return nodes.concat();
+    if (quantity) closest = [];
 
-  if (radius == null) radius = Infinity;
-  else radius *= radius;
+    if (radius == null) radius = Infinity;
+    else radius *= radius;
 
-  for (i = 0; i < n; ++i) {
-    node = nodes[i];
-    dx = x - node.x;
-    dy = y - node.y;
-    d2 = dx * dx + dy * dy;
-    if (d2 < radius) {
-      if (quantity > 1) {
-        if (!closest.length) {
-          closest.push(node);
-          innerRadius = d2;
-        } else {
-          if (d2 < innerRadius) {
-            innerRadius = d2;
-            closest.unshift(node);
-          	if (closest.length >= quantity) {
-              d2 = closest[closest.length - 1];
-              radius = d2.x * d2.x + d2.y * d2.y;
+    for (i = 0; i < n; ++i) {
+        node = nodes[i];
+        dx = x - node.x;
+        dy = y - node.y;
+        d2 = dx * dx + dy * dy;
+        if (d2 < radius) {
+            if (quantity > 1) {
+                if (!closest.length) {
+                    closest.push(node);
+                    innerRadius = d2;
+                } else {
+                    if (d2 < innerRadius) {
+                        innerRadius = d2;
+                        closest.unshift(node);
+                        if (closest.length >= quantity) {
+                            d2 = closest[closest.length - 1];
+                            radius = d2.x * d2.x + d2.y * d2.y;
+                        }
+                    } else {
+                        closest.push(node);
+                        if (closest.length >= quantity) radius = d2;
+                    }
+                }
+            } else {
+                closest = quantity ? [node] : node;
+                radius = d2;
             }
-          } else {
-            closest.push(node);
-          	if (closest.length >= quantity) radius = d2;
-          }
         }
-      } else {
-        closest = quantity ? [node] : node;
-  	    radius = d2;
-      }
     }
-  }
 
-  return closest;
+    return closest;
 };
 
 // data; not in json file for dev purposes
@@ -151,7 +151,7 @@ svg = d3.select("#svg_container")
 window.addEventListener("resize", onResize);
 
 // create layers
-layers = [];
+layers = {};
 layers.background = createLayer("background-layer", data.background);
 layers.middle = createLayer("middle-layer", data.middle);
 layers.foreground = createLayer("foreground-layer", data.foreground);
@@ -196,7 +196,6 @@ function ticked() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    //let node = layers.foreground.simulation.find(mouse.x, mouse.y, interactionRange);
     let nearestNodes = findAll(mouse.x, mouse.y, interactionRange, layers.foreground.simulation, 3);
 
     if (nearestNodes) {
