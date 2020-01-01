@@ -1,12 +1,12 @@
-const NUMBER_OF_TAGS = 8; // default number of middle nodes
+const NUMBER_OF_TAGS = 12; // default number of middle nodes
 
 let r = 10, // px
     dr = 10, // max increment to random radius, px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
     attractionRate = 0.5, // how fast nodes are attracted to cursor
-    velocityDecay = 0.05,
-    randomVelocity = 50,
+    velocityDecay = 0.1,
+    randomVelocity = 2,
     randomPushRate = 0.005, // prob that node will be pushed
     charge = -0.1,
     chargeDistance = 100, // max node to node interaction distance, px
@@ -15,8 +15,8 @@ let r = 10, // px
     enterDuration = 100,
     gaussBlur = 1.5,
     mouse = {x: 0, y: 0},
-    alphaTarget = 0.2, // simulation parameters
-    alphaInitial = 0.2,
+    alphaTarget = 0.1, // simulation parameters
+    alphaInitial = 0.1,
     alphaDecay = 0, // let simulation never end
     width,
     height,
@@ -354,7 +354,8 @@ function initMidLayer() {
     let nodes = layers.middle.nodes;
 
     simulation = initSimulation(data)
-        .on("tick", tickedMid);
+        .on("tick", tickedMid)
+        .velocityDecay(velocityDecay*0.1);
     layers.middle.simulation = simulation;
 }
 
