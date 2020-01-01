@@ -202,8 +202,7 @@ function ticked() {
     if (nearestNodes) {
         nearestNodes.forEach(function(node){
           // set node velocity towards cursor
-          node.vx = (mouse.x - node.x)*attractionRate;
-          node.vy = (mouse.y - node.y)*attractionRate;
+          moveToCursor(node, attractionRate);
 
           mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
           blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
@@ -235,11 +234,13 @@ function tickedMid() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    let node = layers.middle.simulation.find(mouse.x, mouse.y, interactionRange);
+    let nearestNodes = findAll(mouse.x, mouse.y, interactionRange, layers.middle.simulation, 3);
 
-    if (node) {
-        // set node velocity towards cursor
-        moveToCursor(node, -attractionRate);
+    if (nearestNodes) {
+        nearestNodes.forEach(function(node) {
+            // set node velocity towards cursor
+            moveToCursor(node, -attractionRate);
+        });
     }
 }
 
