@@ -374,24 +374,9 @@ function initForegroundLayer() {
     nodes.selectAll("circle")
         .on("click", onNodeClick);
 
-    // add force layers.foreground.simulation
-    let simulation = d3.forceSimulation(data.nodes)
-        .force("charge", d3.forceManyBody())
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("link", d3.forceLink(data.links).id(d => d.title))
-        .alpha(alphaInitial)
-        .alphaDecay(alphaDecay)
-        .velocityDecay(velocityDecay)
+    // add simulation
+    simulation = initSimulation(data)
         .on("tick", ticked);
-    simulation
-        .force("link")
-        .distance(height*linkLength)
-        .strength(linkStrength);
-    simulation
-        .force("charge")
-        .strength(charge*height)
-        .distanceMax(chargeDistance);
-
     layers.foreground.simulation = simulation;
 }
 
@@ -400,23 +385,8 @@ function initMidLayer() {
     let data = layers.middle.data;
     let nodes = layers.middle.nodes;
 
-    let simulation = d3.forceSimulation(data.nodes)
-        .force("charge", d3.forceManyBody().strength(charge*height))
-        .force("center", d3.forceCenter(width/2, height/2))
-        .force("link", d3.forceLink(data.links).id(d => d.title))
-        .alpha(alphaInitial)
-        .alphaDecay(alphaDecay)
-        .velocityDecay(velocityDecay)
+    simulation = initSimulation(data)
         .on("tick", tickedMid);
-    simulation
-        .force("link")
-        .distance(height*linkLength)
-        .strength(linkStrength);
-    simulation
-        .force("charge")
-        .strength(charge*height)
-        .distanceMax(chargeDistance);
-
     layers.middle.simulation = simulation;
 }
 
@@ -540,4 +510,26 @@ function moveToCursor(node, attractionRate) {
 
 function moveRandom(node) {
 
+}
+
+
+function initSimulation(data) {
+    // initialize simulation for foreground and middle layers
+    // as it is pretty much the same
+    let simulation = d3.forceSimulation(data.nodes)
+        .force("charge", d3.forceManyBody().strength(charge*height))
+        .force("center", d3.forceCenter(width/2, height/2))
+        .force("link", d3.forceLink(data.links).id(d => d.title))
+        .alpha(alphaInitial)
+        .alphaDecay(alphaDecay)
+        .velocityDecay(velocityDecay);
+    simulation
+        .force("link")
+        .distance(height*linkLength)
+        .strength(linkStrength);
+    simulation
+        .force("charge")
+        .strength(charge*height)
+        .distanceMax(chargeDistance);
+    return simulation;
 }
