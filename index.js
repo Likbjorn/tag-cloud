@@ -477,13 +477,6 @@ function createDummyLinks(data, probability=0.2) {
 }
 
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-
 function initData(data) {
     // add missing properties if any
     data.nodes.forEach(function(node) {
@@ -493,12 +486,6 @@ function initData(data) {
         node.id = node.title ? node.title.replace(/ /g, "") : null;
     });
     return data;
-}
-
-
-function restartSimulations() {
-    layers.middle.simulation.alphaTarget(alphaTarget).restart();
-    layers.foreground.simulation.alphaTarget(alphaTarget).restart();
 }
 
 
@@ -532,4 +519,17 @@ function initSimulation(data) {
         .strength(charge*height)
         .distanceMax(chargeDistance);
     return simulation;
+}
+
+
+function restartSimulations() {
+    layers.middle.simulation.alphaTarget(alphaTarget).restart();
+    layers.foreground.simulation.alphaTarget(alphaTarget).restart();
+}
+
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
