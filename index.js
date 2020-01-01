@@ -23,6 +23,56 @@ svgContainer = document.getElementById("svg_container");
 width = svgContainer.clientWidth;
 height = svgContainer.clientHeight;
 
+findAll = function(x, y, radius, simulation, quantity = 0) {
+  nodes = simulation.nodes();
+  let i = 0,
+      n = nodes.length,
+      dx,
+      dy,
+      d2,
+      node,
+      closest,
+      innerRadius;
+
+	if (n < quantity) return nodes.concat();
+  if (quantity) closest = [];
+
+  if (radius == null) radius = Infinity;
+  else radius *= radius;
+
+  for (i = 0; i < n; ++i) {
+    node = nodes[i];
+    dx = x - node.x;
+    dy = y - node.y;
+    d2 = dx * dx + dy * dy;
+    if (d2 < radius) {
+      if (quantity > 1) {
+        if (!closest.length) {
+          closest.push(node);
+          innerRadius = d2;
+        } else {
+          if (d2 < innerRadius) {
+            innerRadius = d2;
+            closest.unshift(node);
+          	if (closest.length >= quantity) {
+              d2 = closest[closest.length - 1];
+              radius = d2.x * d2.x + d2.y * d2.y;
+            }
+          } else {
+            closest.push(node);
+          	if (closest.length >= quantity) radius = d2;
+          }
+        }
+      } else {
+        closest = quantity ? [node] : node;
+  	    radius = d2;
+      }
+    }
+  }
+
+  return closest;
+};
+
 // data; not in json file for dev purposes
 let data = {};
 data.foreground = {
@@ -88,7 +138,7 @@ svg = d3.select("#svg_container")
     .append("svg")
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("preserveAspectRatio", "none")
-    .attr("text-anchor", "middle")
+    .attr("text-anchor", "left")
     .classed("svg-content", true);
 
 // add listener for resize
@@ -140,24 +190,28 @@ function ticked() {
         .attr("y2", d => d.target.y);
 
     // find nearest node
-    let node = layers.foreground.simulation.find(mouse.x, mouse.y, interactionRange);
+    //let node = layers.foreground.simulation.find(mouse.x, mouse.y, interactionRange);
+    let nearestNodes = findAll(mouse.x, mouse.y, interactionRange, layers.foreground.simulation, 3);
 
-    if (node) {
-        // set node velocity towards cursor
-        node.vx = (mouse.x - node.x)*attractionRate;
-        node.vy = (mouse.y - node.y)*attractionRate;
+    if (nearestNodes) {
+        nearestNodes.forEach(function(node){
+          // set node velocity towards cursor
+          node.vx = (mouse.x - node.x)*attractionRate;
+          node.vy = (mouse.y - node.y)*attractionRate;
 
-        mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
-        blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
+          mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
+          blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
 
-        // blur it
-        if (d3.select("g.foreground-layer#"+node.id) != d3.select("g.foreground-layer > g > .hovered_circle")) {
-            d3.select("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
-            //blur_ratio = gaussBlur;
-            d3.select("#"+node.id).classed("hovered_circle", true);
-            prev_node = node;
-        }
-        blur_filter_svg.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
+          // blur it
+          if (d3.select("g.foreground-layer#"+node.id) != d3.select("g.foreground-layer > g > .hovered_circle")) {
+              d3.select("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
+              //blur_ratio = gaussBlur;
+              d3.select("#"+node.id).classed("hovered_circle", true);
+              prev_node = node;
+          }
+          blur_filter_svg.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
+        })
+
     } else if (prev_node) {
         d3.select("#"+prev_node.id).classed("hovered_circle", false);
     }
@@ -296,16 +350,13 @@ function initForegroundLayer() {
 
     nodes.append("text")
         .text(d => d.title)
-        .attr("x", 30)
+        .attr("x", 10)
         .attr("y", -15);
-<<<<<<< HEAD
 
     nodes.append("text")
         .attr("id", "coords")
         .attr("dy", 20)
         .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
-=======
->>>>>>> 5022007f95622577d91b77588d525c63d75ce672
 
     // add drag functionality
     nodes.call(
