@@ -140,7 +140,7 @@ function ticked() {
         .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
 
     // remove highlight from all nodes
-    d3.select("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
+    d3.selectAll("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
 
     // update links
     layers.foreground.links
