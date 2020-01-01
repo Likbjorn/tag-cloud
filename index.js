@@ -30,55 +30,6 @@ svgContainer = document.getElementById("svg_container");
 width = svgContainer.clientWidth;
 height = svgContainer.clientHeight;
 
-findAll = function(x, y, radius, simulation, quantity = 0) {
-    nodes = simulation.nodes();
-    let i = 0,
-        n = nodes.length,
-        dx,
-        dy,
-        d2,
-        node,
-        closest,
-        innerRadius;
-
-    if (n < quantity) return nodes.concat();
-    if (quantity) closest = [];
-
-    if (radius == null) radius = Infinity;
-    else radius *= radius;
-
-    for (i = 0; i < n; ++i) {
-        node = nodes[i];
-        dx = x - node.x;
-        dy = y - node.y;
-        d2 = dx * dx + dy * dy;
-        if (d2 < radius) {
-            if (quantity > 1) {
-                if (!closest.length) {
-                    closest.push(node);
-                    innerRadius = d2;
-                } else {
-                    if (d2 < innerRadius) {
-                        innerRadius = d2;
-                        closest.unshift(node);
-                        if (closest.length >= quantity) {
-                            d2 = closest[closest.length - 1];
-                            radius = d2.x * d2.x + d2.y * d2.y;
-                        }
-                    } else {
-                        closest.push(node);
-                        if (closest.length >= quantity) radius = d2;
-                    }
-                }
-            } else {
-                closest = quantity ? [node] : node;
-                radius = d2;
-            }
-        }
-    }
-
-    return closest;
-};
 
 // data; not in json file for dev purposes
 let data = {};
@@ -531,4 +482,55 @@ function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+function findAll(x, y, radius, simulation, quantity = 0) {
+    nodes = simulation.nodes();
+    let i = 0,
+        n = nodes.length,
+        dx,
+        dy,
+        d2,
+        node,
+        closest,
+        innerRadius;
+
+    if (n < quantity) return nodes.concat();
+    if (quantity) closest = [];
+
+    if (radius == null) radius = Infinity;
+    else radius *= radius;
+
+    for (i = 0; i < n; ++i) {
+        node = nodes[i];
+        dx = x - node.x;
+        dy = y - node.y;
+        d2 = dx * dx + dy * dy;
+        if (d2 < radius) {
+            if (quantity > 1) {
+                if (!closest.length) {
+                    closest.push(node);
+                    innerRadius = d2;
+                } else {
+                    if (d2 < innerRadius) {
+                        innerRadius = d2;
+                        closest.unshift(node);
+                        if (closest.length >= quantity) {
+                            d2 = closest[closest.length - 1];
+                            radius = d2.x * d2.x + d2.y * d2.y;
+                        }
+                    } else {
+                        closest.push(node);
+                        if (closest.length >= quantity) radius = d2;
+                    }
+                }
+            } else {
+                closest = quantity ? [node] : node;
+                radius = d2;
+            }
+        }
+    }
+
+    return closest;
 }
