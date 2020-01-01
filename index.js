@@ -5,7 +5,9 @@ let r = 10, // px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
     attractionRate = 0.5, // how fast nodes are attracted to cursor
-    velocityDecay = 0.1,
+    velocityDecay = 0.05,
+    randomVelocity = 50,
+    randomPushRate = 0.005, // prob that node will be pushed
     charge = -0.1,
     chargeDistance = 100, // max node to node interaction distance, px
     linkStrength = 0.2,
@@ -179,6 +181,14 @@ function tickedMid() {
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
 
+    let nodes = layers.middle.data.nodes;
+
+    nodes.forEach(function (node) {
+        if (Math.random() < randomPushRate) {
+            randomPush(node);
+        }
+    });
+
     // find nearest node
     let nearestNodes = findAll(mouse.x, mouse.y, interactionRange, layers.middle.simulation, 3);
 
@@ -280,10 +290,22 @@ function moveNode(d) {
     // move node to position (SVG coordinates)
 
     // set svg borders
-    if (d.x > width - d.r) d.x = width - d.r;
-    if (d.y > height - d.r) d.y = height - d.r;
-    if (d.x < d.r) d.x = d.r;
-    if (d.y < d.r) d.y = d.r;
+    if (d.x > width - d.r) {
+        d.x = width - d.r;
+        d.vx *= -1;
+    }
+    if (d.y > height - d.r) {
+        d.y = height - d.r;
+        d.vy *= -1;
+    }
+    if (d.x < d.r) {
+        d.x = d.r;
+        d.vx *= -1;
+    }
+    if (d.y < d.r) {
+        d.y = d.r;
+        d.vy *= -1;
+    }
 
     // return position
     return `translate(${d.x}, ${d.y})`;
@@ -441,8 +463,10 @@ function moveToCursor(node, attractionRate) {
 }
 
 
-function moveRandom(node) {
-
+function randomPush(node) {
+    let pushAngle = Math.random()*Math.PI*2;
+    node.vx += randomVelocity*Math.cos(pushAngle);
+    node.vy += randomVelocity*Math.sin(pushAngle);
 }
 
 
