@@ -1,14 +1,21 @@
 const NUMBER_OF_TAGS = 8; // default number of middle nodes
 
-let r = 50, // px
+let r = 10, // px
+    dr = 10, // max increment to random radius, px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
-    attractionRate = 0.05, // how fast nodes are attracted to cursor
+    attractionRate = 0.5, // how fast nodes are attracted to cursor
+    velocityDecay = 0.1,
     charge = -0.1,
+    chargeDistance = 100, // max node to node interaction distance, px
+    linkStrength = 0.2,
     exitDuration = 1000,
     enterDuration = 100,
     gaussBlur = 1.5,
     mouse = {x: 0, y: 0},
+    alphaTarget = 0.2, // simulation parameters
+    alphaInitial = 0.2,
+    alphaDecay = 0, // let simulation never end
     width,
     height,
     svg, svgContainer,
@@ -129,8 +136,6 @@ let subLayerTags = [
     "Deebs",
 ];
 
-data.foreground.nodes.forEach( i => i.id = i.title.replace(/ /g, ""));
-
 initData(data.foreground);
 
 // create svg - probably can be done in index.html
@@ -179,6 +184,7 @@ function ticked() {
     // move each node according to forces
     layers.foreground.nodes.attr("transform", moveNode);
 
+    // debug coords
     layers.foreground.nodes.select("#coords")
         .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
 
@@ -228,11 +234,18 @@ function tickedMid() {
         .attr("x2", d => d.target.x)
         .attr("y2", d => d.target.y);
 
+    // find nearest node
+    let node = layers.middle.simulation.find(mouse.x, mouse.y, interactionRange);
+
+    if (node) {
+        // set node velocity towards cursor
+        moveToCursor(node, -attractionRate);
+    }
 }
 
 // event handlers
 
-function onNodeClick() {
+function onNodeClick(node) {
     // do pretty transition
     layers.foreground.group
         .selectAll("text") // text does not inherit opacity for some reason
@@ -247,16 +260,11 @@ function onNodeClick() {
         .remove();
 
     // promote middle layer
+    layers.foreground = layers.middle;
     layers.foreground.group = layers.middle.group.classed("middle-layer", false)
         .classed("foreground-layer", true);
-    layers.foreground.data = layers.middle.data;
-    layers.foreground.nodes = layers.middle.nodes;
-    layers.foreground.links = layers.middle.links;
 
-    // TODO: Add children data request and fill "title" attribute in data
-    layers.foreground.data.nodes.forEach(function(node, i) {
-        node.title = subLayerTags[i];
-    });
+    requestData(node); // request new data basing on clicked node
 
     // create new middle layer
     layers.middle = createLayer(
@@ -284,33 +292,29 @@ function onResize() {
 
     // resize viewport
     svg.attr("viewBox", `0 0 ${width} ${height}`);
-    // change sim parameters
 
+    // change sim parameters
     layers.foreground.simulation.force("center")
-        .x(width/2)
-        .y(height/2);
+        .x(width / 2)
+        .y(height / 2);
     layers.foreground.simulation.force("link")
         .distance(height*linkLength);
 
     layers.middle.simulation.force("center")
-        .x(width/2)
-        .y(height/2);
+        .x(width / 2)
+        .y(height / 2);
     layers.middle.simulation.force("link")
         .distance(height*linkLength);
-
-    restartSimulations();
 }
 
 
-function dragStarted (d) {
-    if (!d3.event.active) restartSimulations();
+function dragStarted(d) {
     d.fx = d.x;
     d.fy = d.y;
 }
 
 
 function dragged(d) {
-    if (!d3.event.active) restartSimulations();
     mouse.x = d3.event.x;
     mouse.y = d3.event.y;
 
@@ -320,7 +324,6 @@ function dragged(d) {
 
 
 function dragEnded(d) {
-    if (!d3.event.active) restartSimulations();
     d.fx = null;
     d.fy = null;
 }
@@ -371,17 +374,24 @@ function initForegroundLayer() {
         .on("click", onNodeClick);
 
     // add force layers.foreground.simulation
-    layers.foreground.simulation = d3.forceSimulation(data.nodes)
-        .force("charge", d3.forceManyBody().strength(charge*height))
+    let simulation = d3.forceSimulation(data.nodes)
+        .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
-        .force("collide", d3.forceCollide(r).strength(0.5))
+        .alpha(alphaInitial)
+        .alphaDecay(alphaDecay)
+        .velocityDecay(velocityDecay)
         .on("tick", ticked);
-
-    layers.foreground.simulation
+    simulation
         .force("link")
         .distance(height*linkLength)
-        .strength(0.5);
+        .strength(linkStrength);
+    simulation
+        .force("charge")
+        .strength(charge*height)
+        .distanceMax(chargeDistance);
+
+    layers.foreground.simulation = simulation;
 }
 
 
@@ -389,16 +399,24 @@ function initMidLayer() {
     let data = layers.middle.data;
     let nodes = layers.middle.nodes;
 
-    layers.middle.simulation = d3.forceSimulation(data.nodes)
+    let simulation = d3.forceSimulation(data.nodes)
         .force("charge", d3.forceManyBody().strength(charge*height))
-        .force("collide", d3.forceCollide(r).strength(0.5))
         .force("center", d3.forceCenter(width/2, height/2))
         .force("link", d3.forceLink(data.links).id(d => d.title))
+        .alpha(alphaInitial)
+        .alphaDecay(alphaDecay)
+        .velocityDecay(velocityDecay)
         .on("tick", tickedMid);
-    layers.middle.simulation
+    simulation
         .force("link")
         .distance(height*linkLength)
-        .strength(0.5);
+        .strength(linkStrength);
+    simulation
+        .force("charge")
+        .strength(charge*height)
+        .distanceMax(chargeDistance);
+
+    layers.middle.simulation = simulation;
 }
 
 
@@ -447,19 +465,24 @@ function createLayer(layerCSS, data, afterCSS=null) {
 }
 
 
+function requestData(node) {
+    // placeholder
+    console.log("Requesting child tags of " + node.title);
+    // TODO: Add children data request and fill "title" attribute in data
+    layers.foreground.data.nodes.forEach(function(node, i) {
+        node.title = subLayerTags[i];
+    });
+    initData(layers.foreground.data); // update IDs basing on titles
+}
+
+
 function createDummyData(n=NUMBER_OF_TAGS) {
     // create data with random node coordinates
     let data = {nodes: [], links: []};
     for (let i = 0; i < n; i++) {
-        let x = getRandomInt(0, width),
-            y = getRandomInt(0, height),
-            rad = getRandomInt(r, r+20);
-        data.nodes.push({
-            x: x,
-            y: y,
-            r: rad
-        });
+        data.nodes.push({title: "placeholder"+i});
     }
+    initData(data);
 
     createDummyLinks(data);
 
@@ -493,15 +516,27 @@ function getRandomInt(min, max) {
 function initData(data) {
     // add missing properties if any
     data.nodes.forEach(function(node) {
-        node.x = node.x ? node.x : width/2;
-        node.y = node.y ? node.y : height/2;
-        node.r = node.r ? node.r : r;
+        node.x = node.x ? node.x : getRandomInt(0, width);
+        node.y = node.y ? node.y : getRandomInt(0, height);
+        node.r = node.r ? node.r : getRandomInt(r, r+dr);
+        node.id = node.title ? node.title.replace(/ /g, "") : null;
     });
     return data;
 }
 
 
 function restartSimulations() {
-    layers.middle.simulation.alphaTarget(0.3).restart();
-    layers.foreground.simulation.alphaTarget(0.3).restart();
+    layers.middle.simulation.alphaTarget(alphaTarget).restart();
+    layers.foreground.simulation.alphaTarget(alphaTarget).restart();
+}
+
+
+function moveToCursor(node, attractionRate) {
+    node.vx += attractionRate*Math.sin((mouse.x - node.x)*Math.PI/interactionRange);
+    node.vy += attractionRate*Math.sin((mouse.y - node.y)*Math.PI/interactionRange);
+}
+
+
+function moveRandom(node) {
+
 }
