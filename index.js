@@ -4,7 +4,7 @@ let r = 10, // px
     dr = 10, // max increment to random radius, px
     linkLength = 0.35, // relative to viewport height
     interactionRange = 80, // px
-    attractionRate = 0.01, // how fast nodes are attracted to cursor
+    attractionRate = 0.5, // how fast nodes are attracted to cursor
     velocityDecay = 0.1,
     charge = -0.1,
     chargeDistance = 100, // max node to node interaction distance, px
@@ -467,6 +467,11 @@ function restartSimulations() {
 
 
 function moveToCursor(node, attractionRate) {
-    node.vx += attractionRate*(mouse.x - node.x);
-    node.vy += attractionRate*(mouse.y - node.y);
+    node.vx += attractionRate*Math.sin((mouse.x - node.x)*Math.PI/interactionRange);
+    node.vy += attractionRate*Math.sin((mouse.y - node.y)*Math.PI/interactionRange);
+}
+
+
+function moveRandom(node) {
+
 }
