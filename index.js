@@ -138,7 +138,7 @@ function ticked() {
     layers.foreground.nodes.attr("transform", moveNode);
 
     // remove highlight from all nodes
-    d3.selectAll("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
+    layers.foreground.nodes.selectAll(".hovered_circle").classed("hovered_circle", false);
 
     // update links
     layers.foreground.links
@@ -157,8 +157,7 @@ function ticked() {
             moveToCursor(node, attractionRate);
             d3.select("#"+node.id).classed("hovered_circle", true);
 
-            mouse_node_dist = Math.sqrt((mouse.x - node.x)**2 + (mouse.y - node.y)**2);
-            blur_ratio = (interactionRange-mouse_node_dist)/(interactionRange-r)*gaussBlur;
+            mouse_node_dist = Math.hypot(mouse.x - node.x, mouse.y - node.y);
 
             // blur it
             blur_filter_svg.attr("stdDeviation", blur_ratio <= gaussBlur ? blur_ratio : gaussBlur);
