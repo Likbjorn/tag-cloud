@@ -137,10 +137,6 @@ function ticked() {
     // move each node according to forces
     layers.foreground.nodes.attr("transform", moveNode);
 
-    // debug coords
-    layers.foreground.nodes.select("#coords")
-        .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
-
     // remove highlight from all nodes
     d3.selectAll("g.foreground-layer > g > .hovered_circle").classed("hovered_circle", false);
 
@@ -324,11 +320,6 @@ function initForegroundLayer() {
         .text(d => d.title)
         .attr("x", 10)
         .attr("y", -15);
-
-    nodes.append("text")
-        .attr("id", "coords")
-        .attr("dy", 20)
-        .text(d => `x=${Math.round(d.x)}; y=${Math.round(d.y)}`);
 
     // add drag functionality
     nodes.call(
