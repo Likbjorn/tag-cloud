@@ -105,7 +105,6 @@ window.addEventListener("resize", onResize);
 
 // create layers
 layers = {};
-layers.background = createLayer("background-layer", data.background);
 layers.middle = createLayer("middle-layer", data.middle);
 layers.foreground = createLayer("foreground-layer", data.foreground);
 
