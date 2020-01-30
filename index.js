@@ -210,6 +210,10 @@ function onNodeClick(node) {
         .attr("stroke-opacity", 0)
         .remove();
 
+    // disable previous simulations
+    layers.middle.simulation.stop()
+    layers.foreground.simulation.stop()
+    
     // promote middle layer
     layers.foreground = layers.middle;
     layers.foreground.group = layers.middle.group.classed("middle-layer", false)
